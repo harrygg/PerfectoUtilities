@@ -1,2 +1,2 @@
-# g.perfecto.utilities
+# PerfectoUtilities
 Object oriented wrapper for Perfecto Mobile API
