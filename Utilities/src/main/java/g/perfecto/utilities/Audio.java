@@ -117,7 +117,7 @@ public class Audio
 	 * It accepts an audio file that may be recorded from a device and creates a text file that contains the textual translation of the audio file.
 	 * @param audioInput - path to audio file on the device or in Perfecto repository
 	 * @param language The supported Audio file languages.
-	 * @phrase Provides a list of phrases for speech-to-text library to use to avoid confusion. For example, provide the words:‘two’ and ‘four’ to avoid confusion with ‘to’ and ‘for’. 
+	 * @phrase Provides a list of phrases for speech-to-text library to use to avoid confusion. For example, provide the words:ï¿½twoï¿½ and ï¿½fourï¿½ to avoid confusion with ï¿½toï¿½ and ï¿½forï¿½. 
 	 * @param rate Indicates the sampling rate of the audio recording
 	 * @param profile Profile of the NLP network
 	 * @return
@@ -259,7 +259,7 @@ public class Audio
 	 * @param generic A generic audio parameter.
 	 * @return
 	 */
-	public String ValidateAudio(String deviceAudio, String repositoryKey, Double treshold, String profile, String silenceTrimmingType, Double silenceTrimmingLevel, String calibration, String generic)
+	public String ValidateAudio(String deviceAudio, String repositoryKey, Double threshold, String profile, String silenceTrimmingType, Double silenceTrimmingLevel, String calibration, String generic)
 	{
 		this.deviceAudioFile = deviceAudio;
 		this.repositoryKey = repositoryKey;
@@ -286,7 +286,7 @@ public class Audio
 		return Validate();
 	}
 	
-	public String ValidateAudio(String deviceAudio, String repositoryKey, Double treshold, String profile, String silenceTrimmingType, Double silenceTrimmingLevel)
+	public String ValidateAudio(String deviceAudio, String repositoryKey, Double threshold, String profile, String silenceTrimmingType, Double silenceTrimmingLevel)
 	{
 		this.deviceAudioFile = deviceAudio;
 		this.repositoryKey = repositoryKey;
@@ -298,7 +298,7 @@ public class Audio
 		return Validate();
 	}
 	
-	public String ValidateAudio(String deviceAudio, String repositoryKey, Double treshold, String profile, String silenceTrimmingType)
+	public String ValidateAudio(String deviceAudio, String repositoryKey, Double threshold, String profile, String silenceTrimmingType)
 	{
 		this.deviceAudioFile = deviceAudio;
 		this.repositoryKey = repositoryKey;
@@ -309,7 +309,7 @@ public class Audio
 		return Validate();
 	}
 	
-	public String ValidateAudio(String deviceAudio, String repositoryKey, Double treshold, String profile)
+	public String ValidateAudio(String deviceAudio, String repositoryKey, Double threshold, String profile)
 	{
 		this.deviceAudioFile = deviceAudio;
 		this.repositoryKey = repositoryKey;
@@ -319,7 +319,7 @@ public class Audio
 		return Validate();
 	}
 	
-	public String ValidateAudio(String deviceAudio, String repositoryKey, Double treshold)
+	public String ValidateAudio(String deviceAudio, String repositoryKey, Double threshold)
 	{
 		this.deviceAudioFile = deviceAudio;
 		this.repositoryKey = repositoryKey;
@@ -381,7 +381,7 @@ public class Audio
 	 * @param language The supported Audio file languages.
 	 * @param rate 	Indicates the sampling rate of the audio recording
 	 * @param profile Profile of the NLP network
-	 * @param phrase Provides a list of phrases for speech-to-text library to use to avoid confusion. For example, provide the words:‘two’ and ‘four’ to avoid confusion with ‘to’ and ‘for’.
+	 * @param phrase Provides a list of phrases for speech-to-text library to use to avoid confusion. For example, provide the words:ï¿½twoï¿½ and ï¿½fourï¿½ to avoid confusion with ï¿½toï¿½ and ï¿½forï¿½.
 	 * @return
 	 */
 	public Boolean ValidateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words, String exact, Double threshold, Integer confidence, String language, String rate, String profile, List<String> phrases)
@@ -557,7 +557,6 @@ public class Audio
 		
 		if (target != null)
 			params.put("target", target);
-			
 		
 		if (match != null)
 			params.put("match", match);
@@ -568,7 +567,6 @@ public class Audio
 		if (words != null)
 			if (words)
 				params.put("words", "words");
-		
 		
 		if (exact != null)
 			params.put("exact", exact);

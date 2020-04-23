@@ -29,29 +29,28 @@ public class Network {
 	public int packetReordering = 0;
 	
 	public String profile = null;
-	public final String profile_2g_gprs_good = "2g_gprs_good";
-	public final String profile_2g_gprs_average  = "2g_gprs_average";
-	public final String profile_2g_gprs_poor  = "2g_gprs_poor";
-	public final String profile_2g_edge_good = "2g_edge_good";
-	public final String profile_2g_edge_average = "2g_edge_average";
-	public final String profile_2g_edge_poor = "2g_edge_poor";
-	public final String profile_3g_umts_good = "3g_umts_good";
-	public final String profile_3g_umts_average = "3g_umts_average";
-	public final String profile_3g_umts_poor = "3g_umts_poor";
-	public final String profile_35g_hspa_good = "3.5g_hspa_good";
-	public final String profile_35g_hspa_average = "3.5g_hspa_average";
-	public final String profile_35g_hspa_poor = "3.5g_hspa_poor";
-	public final String profile_35g_hspa_plus_good = "3.5g_hspa_plus_good";
-	public final String profile_35g_hspa_plus_average = "3.5g_hspa_plus_average";
-	public final String profile_35g_hspa_plus_poor = "3.5g_hspa_plus_poor";
-	public final String profile_4g_lte_good = "4g_lte_good";
-	public final String profile_4g_lte_average = "4g_lte_average";
-	public final String profile_4g_lte_poor = "4g_lte_poor";
-	public final String profile_4g_lte_advanced_good = "4g_lte_advanced_good";
-	public final String profile_4g_lte_advanced_average = "4g_lte_advanced_average";
-	public final String profile_4g_4g_lte_advanced_poor = "4g_lte_advanced_poor";
-	public final String profile_bandwidth_good = "bandwidth_good";
-	
+  public final String PROFILE_2G_GPRS_GOOD = "2g_gprs_good";
+  public final String PROFILE_2G_GPRS_AVERAGE  = "2g_gprs_average";
+  public final String PROFILE_2G_GPRS_POOR  = "2g_gprs_poor";
+  public final String PROFILE_2G_EDGE_GOOD = "2g_edge_good";
+  public final String PROFILE_2G_EDGE_AVERAGE = "2g_edge_average";
+  public final String PROFILE_2G_EDGE_POOR = "2g_edge_poor";
+  public final String PROFILE_3G_UMTS_GOOD = "3g_umts_good";
+  public final String PROFILE_3G_UMTS_AVERAGE = "3g_umts_average";
+  public final String PROFILE_3G_UMTS_POOR = "3g_umts_poor";
+  public final String PROFILE_35G_HSPA_GOOD = "3.5g_hspa_good";
+  public final String PROFILE_35G_HSPA_AVERAGE = "3.5g_hspa_average";
+  public final String PROFILE_35G_HSPA_POOR = "3.5g_hspa_poor";
+  public final String PROFILE_35G_HSPA_PLUS_GOOD = "3.5g_hspa_plus_good";
+  public final String PROFILE_35G_HSPA_PLUS_AVERAGE = "3.5g_hspa_plus_average";
+  public final String PROFILE_35G_HSPA_PLUS_POOR = "3.5g_hspa_plus_poor";
+  public final String PROFILE_4G_LTE_GOOD = "4g_lte_good";
+  public final String PROFILE_4G_LTE_AVERAGE = "4g_lte_average";
+  public final String PROFILE_4G_LTE_POOR = "4g_lte_poor";
+  public final String PROFILE_4G_LTE_ADVANCED_GOOD = "4g_lte_advanced_good";
+  public final String PROFILE_4G_LTE_ADVANCED_AVERAGE = "4g_lte_advanced_average";
+  public final String PROFILE_4G_4G_LTE_ADVANCED_POOR = "4g_lte_advanced_poor";
+  public final String PROFILE_BANDWIDTH_GOOD = "bandwidth_good";
 	
 	public Network(RemoteWebDriver driver) {
 		this.driver = driver;
@@ -75,7 +74,6 @@ public class Network {
 		return ModifyNetworkSetting("data", false);
 	}
 	
-	
 	public Boolean EnableAirplaneMode() {
 		return ModifyNetworkSetting("airplanemode", true);
 	}
@@ -83,7 +81,6 @@ public class Network {
 	public Boolean DisableAirplaneMode() {
 		return ModifyNetworkSetting("airplanemode", false);
 	}
-	
 	
 	public Boolean EnableRadioMode() {
 		return ModifyNetworkSetting("radioMode", true);
@@ -118,7 +115,7 @@ public class Network {
 			return true;
 		} catch (Exception ex)
 		{
-			System.out.println("Failed to set " + property);
+			Logger.LogError("Failed to set " + property);
 			ex.printStackTrace(); 
 			return false;
 		}
@@ -134,7 +131,7 @@ public class Network {
 			return retVal == "true" || retVal == "True";
 		} catch (Exception ex)
 		{
-			System.out.println("Failed to retrieve property" + params.get("property"));
+		  Logger.LogError("Failed to retrieve property" + params.get("property"));
 			ex.printStackTrace(); 
 			return false;
 		}
@@ -142,7 +139,6 @@ public class Network {
 	
 	public Boolean StartVirtualization()
 	{
-		
 		if (generateHarFile)
 			params.put("generateHarFile", "true");
 		
@@ -152,7 +148,7 @@ public class Network {
 			driver.executeScript(COMMAND_NVSTART, params);
 		} catch (Exception ex)
 		{
-			System.out.println("Failed to start Network Virtualization");
+		  Logger.LogError("Failed to start Network Virtualization");
 			ex.printStackTrace(); 
 			return false;
 		}
@@ -172,10 +168,11 @@ public class Network {
 			driver.executeScript(COMMAND_NVSTOP, params);
 		} catch (Exception ex)
 		{
-			System.out.println("Failed to stop Network Virtualization");
+		  Logger.LogError("Failed to stop Network Virtualization");
 			ex.printStackTrace(); 
 			return false;
 		}
+		
 		return true;
 	}
 
@@ -187,7 +184,7 @@ public class Network {
 			driver.executeScript(COMMAND_NVUPDATE, params);
 		} catch (Exception ex)
 		{
-			System.out.println("Failed to update Network Virtualization");
+		  Logger.LogError("Failed to update Network Virtualization");
 			ex.printStackTrace(); 
 			return false;
 		}
@@ -232,7 +229,5 @@ public class Network {
 		
 		if (profile != null)
 			params.put("profile", profile);
-
 	}
-	
 }

@@ -24,7 +24,6 @@ public class UserActions {
 	private final String COMMAND_PRESSKEY = "mobile:presskey";
 	private final String COMMAND_SENDKEY = "mobile:key:event";
 	
-	
 	public UserActions(RemoteWebDriver driver) {
 	  Logger.LogDebug("Creating UserActions object");
 		this.driver = driver;
@@ -39,22 +38,22 @@ public class UserActions {
 	 */
 	public Boolean Drag(String location, int duration, String auxiliary) {
 		
-        Map<String, Object> params = new HashMap<>();
+    Map<String, Object> params = new HashMap<>();
         
 		if (location == null || location.trim().length() == 0){
 			System.out.println("Drag location not provided!");
 			return false;
 		}
 		
-        params.put("location", location);
-        
-        if (duration > 0) 
-        	params.put("duration", duration);
-        
-        if (auxiliary != null && auxiliary.trim().length() > 0)
-        	params.put("auxiliary", auxiliary);
-        
-        return Helper.ExecuteMethod(driver, COMMAND_DRAG, params);
+    params.put("location", location);
+    
+    if (duration > 0) 
+    	params.put("duration", duration);
+    
+    if (auxiliary != null && auxiliary.trim().length() > 0)
+    	params.put("auxiliary", auxiliary);
+    
+    return Helper.ExecuteMethod(driver, COMMAND_DRAG, params);
 	}
 	
 	
@@ -116,7 +115,6 @@ public class UserActions {
 	public Boolean SwipeDown(int duration){
 		return Swipe("45%,50%", "65%,50%", duration);
 	}
-	
 
 	public Boolean SwipeLeft(){
 		return Swipe("50%,65%", "50%,45%");
@@ -124,7 +122,6 @@ public class UserActions {
 	public Boolean SwipeLeft(int duration){
 		return Swipe("50%,65%", "50%,45%", duration);
 	}
-	
 	
 	public Boolean SwipeRight(){
 		return Swipe("50%,45%", "50%,65%");
@@ -150,10 +147,10 @@ public class UserActions {
 			return false;
 		}
 		
-        params.put("location", location);
-        
-        if (duration > 0)
-        	params.put("duration", duration);
+    params.put("location", location);
+    
+    if (duration > 0)
+    	params.put("duration", duration);
         
 		return Helper.ExecuteMethod(driver, COMMAND_TAP, params);
 	}
@@ -222,8 +219,7 @@ public class UserActions {
 	 * @return
 	 */
 	public Boolean SendKeyEvent(Integer keyEvent, Integer metastate)
-	{
-	
+	{	
 		Map<String, Object> params = new HashMap<>();
 		params.put("key", keyEvent);
 		
@@ -322,7 +318,6 @@ public class UserActions {
       e.printStackTrace();
     }
   }
-  
 
   public void Type(String text, WebElement el)
   {
@@ -334,14 +329,11 @@ public class UserActions {
 	{
 		Type(text, driver.findElement(by));
 	}
-	
 
 	public void Type(String text, String xpath)
 	{
 		Type(text, driver.findElement(By.xpath(xpath)));
 	}
-	
-
 	
 	public void TryType(String text, String xpath)
 	{
