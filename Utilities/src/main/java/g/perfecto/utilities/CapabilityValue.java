@@ -3,11 +3,10 @@ package g.perfecto.utilities;
 
 public class CapabilityValue
 {
-	public static final String AUTOMATION_NAME_PERFECTO = "Perfecto";
-	public static final String AUTOMATION_NAME_APPIUM = "Appium";
-	public static final String AUTOMATION_NAME_XCUITEST = "XCUITest";
+  public static final String AUTOMATION_NAME_PERFECTO = "Perfecto";
+  public static final String AUTOMATION_NAME_APPIUM = "Appium";
+  public static final String AUTOMATION_NAME_XCUITEST = "XCUITest";
 	
-
   public static final String BROWSER_NAME_SAFARI = "Safari";
   public static final String BROWSER_NAME_CHROME = "Chrome";
   public static final String BROWSER_NAME_MOBILEOS = "MobileOS";
