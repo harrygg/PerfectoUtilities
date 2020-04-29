@@ -50,6 +50,7 @@ public class Application {
   private final String COMMAND_FINGERPRINT_AUTHENTICATE = "mobile:fingerprint:set";
 
   public Application(RemoteWebDriver driver) {
+    Logger.LogDebug("Creating Application object");
     this.driver = driver;
   }
 
@@ -70,7 +71,7 @@ public class Application {
     this.id = id;
 
     if (install)
-      Install();
+      install();
   }
 
   public Application(RemoteWebDriver driver, String path, String id, Boolean install, Boolean launch) {
@@ -79,10 +80,10 @@ public class Application {
     this.id = id;
 
     if (install)
-      Install();
+      install();
 
     if (launch)
-      Start();
+      start();
   }
 
   /**
@@ -91,7 +92,7 @@ public class Application {
    * 
    * @return true on successful execution of the function
    */
-  public Boolean Install() {
+  public Boolean install() {
 
     Map<String, Object> params = new HashMap<>();
 
@@ -115,7 +116,7 @@ public class Application {
     if (instrumentResetKeychain)
       params.put("instrumentResetKeychain", "true");
 
-    return Helper.ExecuteMethod(driver, COMMAND_INSTALL, params);
+    return Helper.executeMethod(driver, COMMAND_INSTALL, params);
   }
 
   /**
@@ -125,7 +126,7 @@ public class Application {
    * 
    * @return
    */
-  public Boolean Uninstall() {
+  public Boolean uninstall() {
 
     Map<String, Object> params = new HashMap<>();
 
@@ -145,7 +146,7 @@ public class Application {
     }
     params.put(type, identifier);
 
-    return Helper.ExecuteMethod(driver, COMMAND_UNINSTALL, params);
+    return Helper.executeMethod(driver, COMMAND_UNINSTALL, params);
   }
 
   /**
@@ -155,7 +156,7 @@ public class Application {
    * 
    * @return true on successful execution of the function
    */
-  public Boolean Open() {
+  public Boolean open() {
 
     Map<String, Object> params = new HashMap<>();
     String identifier = id;
@@ -175,7 +176,8 @@ public class Application {
     params.put(type, identifier);
     Logger.LogInfo("Starting app " + identifier + " identified by its " + type);
 
-    return Helper.ExecuteMethod(driver, COMMAND_OPEN, params);
+    switchToNativeContext();
+    return Helper.executeMethod(driver, COMMAND_OPEN, params);
   }
 
   /**
@@ -186,10 +188,10 @@ public class Application {
    * @param identifier
    * @return
    */
-  public Boolean Open(String identifier) {
+  public Boolean open(String identifier) {
 
-    if (!OpenById(identifier))
-      return OpenByName(identifier);
+    if (!openById(identifier))
+      return openByName(identifier);
     else
       return true;
   }
@@ -200,10 +202,10 @@ public class Application {
    * @param id
    * @return
    */
-  public Boolean OpenById(String id) {
+  public Boolean openById(String id) {
     Map<String, Object> params = new HashMap<>();
     params.put("identifier", id);
-    return Helper.ExecuteMethod(driver, COMMAND_OPEN, params);
+    return Helper.executeMethod(driver, COMMAND_OPEN, params);
   }
 
   /**
@@ -212,10 +214,10 @@ public class Application {
    * @param name
    * @return
    */
-  public Boolean OpenByName(String name) {
+  public Boolean openByName(String name) {
     Map<String, Object> params = new HashMap<>();
     params.put("name", name);
-    return Helper.ExecuteMethod(driver, COMMAND_OPEN, params);
+    return Helper.executeMethod(driver, COMMAND_OPEN, params);
   }
 
   /**
@@ -223,8 +225,8 @@ public class Application {
    * 
    * @return
    */
-  public Boolean Start() {
-    return Open();
+  public Boolean start() {
+    return open();
   }
 
   /**
@@ -232,8 +234,8 @@ public class Application {
    * 
    * @return
    */
-  public Boolean Start(String identifier) {
-    return Open(identifier);
+  public Boolean start(String identifier) {
+    return open(identifier);
   }
 
   /**
@@ -242,7 +244,7 @@ public class Application {
    * 
    * @return
    */
-  public Boolean Close() {
+  public Boolean close() {
 
     Map<String, Object> params = new HashMap<>();
     String identifier = id;
@@ -262,7 +264,7 @@ public class Application {
     params.put(type, identifier);
     Logger.LogInfo("Closing app " + identifier + " identified by its " + type);
 
-    return Helper.ExecuteMethod(driver, COMMAND_CLOSE, params);
+    return Helper.executeMethod(driver, COMMAND_CLOSE, params);
   }
 
   /**
@@ -272,9 +274,9 @@ public class Application {
    * @param identifier
    * @return
    */
-  public Boolean Close(String identifier) {
-    if (!CloseById(identifier))
-      return CloseByName(identifier);
+  public Boolean close(String identifier) {
+    if (!closeById(identifier))
+      return closeByName(identifier);
     return true;
   }
 
@@ -285,10 +287,10 @@ public class Application {
    *          the bundleID or appPackage
    * @return
    */
-  public Boolean CloseById(String id) {
+  public Boolean closeById(String id) {
     Map<String, Object> params = new HashMap<>();
     params.put("identifier", id);
-    return Helper.ExecuteMethod(driver, COMMAND_CLOSE, params);
+    return Helper.executeMethod(driver, COMMAND_CLOSE, params);
   }
 
   /**
@@ -297,10 +299,10 @@ public class Application {
    * @param name
    * @return
    */
-  public Boolean CloseByName(String name) {
+  public Boolean closeByName(String name) {
     Map<String, Object> params = new HashMap<>();
     params.put("name", name);
-    return Helper.ExecuteMethod(driver, COMMAND_CLOSE, params);
+    return Helper.executeMethod(driver, COMMAND_CLOSE, params);
   }
 
   /**
@@ -308,8 +310,8 @@ public class Application {
    * 
    * @return
    */
-  public Boolean Stop() {
-    return Close();
+  public Boolean stop() {
+    return close();
   }
 
   /**
@@ -318,17 +320,39 @@ public class Application {
    * @param identifier
    * @return
    */
-  public Boolean Stop(String identifier) {
-    return Close(identifier);
+  public Boolean stop(String identifier) {
+    return close(identifier);
   }
 
+  /**
+   * Closes and reopens an application
+   * @return
+   */
+  public Boolean restart()
+  {
+    close();
+    return open();
+  }
+  
+  /**
+   * Closes and reopens app by provided ID
+   * @param id
+   * @return
+   */
+  public Boolean restart(String id)
+  {
+    this.id = id;
+    close();
+    return open();
+  }
+  
   /**
    * Starts activity. App id must be provided prior to calling this method.
    * 
    * @param activityName
    * @return
    */
-  public Boolean StartActivity(String activityName) {
+  public Boolean startActivity(String activityName) {
 
     if (id == null || id.trim().length() == 0) {
       Logger.LogError("App id is not provided!");
@@ -343,7 +367,7 @@ public class Application {
     Map<String, Object> params = new HashMap<>();
     params.put("package", id);
     params.put("activity", activityName);
-    return Helper.ExecuteMethod(driver, COMMAND_ACTIVITYOPEN, params);
+    return Helper.executeMethod(driver, COMMAND_ACTIVITYOPEN, params);
   }
 
   /**
@@ -351,10 +375,10 @@ public class Application {
    * 
    * @return
    */
-  public String GetCurrentActivity() {
+  public String getCurrentActivity() {
     Map<String, Object> params = new HashMap<>();
     params.put("property", "currentActivity");
-    return Helper.ExecuteMethodString(driver, COMMAND_DEVICEINFO, params);
+    return Helper.executeMethodString(driver, COMMAND_DEVICEINFO, params);
   }
 
   /**
@@ -362,10 +386,10 @@ public class Application {
    * 
    * @return
    */
-  public String GetCurrentPackage() {
+  public String getCurrentPackage() {
     Map<String, Object> params = new HashMap<>();
     params.put("property", "currentPackage");
-    return Helper.ExecuteMethodString(driver, COMMAND_DEVICEINFO, params);
+    return Helper.executeMethodString(driver, COMMAND_DEVICEINFO, params);
   }
 
   /**
@@ -373,7 +397,7 @@ public class Application {
    * 
    * @return
    */
-  public Boolean SyncActivity(String activityName) {
+  public Boolean syncActivity(String activityName) {
     Map<String, Object> params = new HashMap<>();
 
     if (id == null || id.trim().length() == 0) {
@@ -389,12 +413,12 @@ public class Application {
     params.put("package", id);
     params.put("activity", activityName);
 
-    return Helper.ExecuteMethod(driver, COMMAND_ACTIVITYSYNC, params);
+    return Helper.executeMethod(driver, COMMAND_ACTIVITYSYNC, params);
   }
 
-  public Boolean SyncActivity(String activityName, int timeout) {
+  public Boolean syncActivity(String activityName, int timeout) {
     this.timeout = timeout;
-    return SyncActivity(activityName);
+    return syncActivity(activityName);
   }
 
   /**
@@ -405,7 +429,7 @@ public class Application {
    *          - path to the image in the repository to be injected
    * @return
    */
-  public Boolean StartImageInjection(String repositoryFile) {
+  public Boolean startImageInjection(String repositoryFile) {
     Map<String, Object> params = new HashMap<>();
 
     if (repositoryFile.trim().length() == 0) {
@@ -428,7 +452,7 @@ public class Application {
       params.put("identifier", id);
     }
 
-    return Helper.ExecuteMethod(driver, COMMAND_IMAGEINJECTIONSTART, params);
+    return Helper.executeMethod(driver, COMMAND_IMAGEINJECTIONSTART, params);
   }
 
   /**
@@ -440,9 +464,9 @@ public class Application {
    *          - id of the application
    * @return
    */
-  public Boolean StartImageInjection(String repositoryFile, String id) {
+  public Boolean startImageInjection(String repositoryFile, String id) {
     this.id = id;
-    return StartImageInjection(repositoryFile);
+    return startImageInjection(repositoryFile);
   }
 
   /**
@@ -455,7 +479,7 @@ public class Application {
   public Boolean StartImageInjectionByName(String repositoryFile, String name) {
     this.id = null;
     this.name = name;
-    return StartImageInjection(repositoryFile, name);
+    return startImageInjection(repositoryFile, name);
   }
 
   /**
@@ -463,8 +487,8 @@ public class Application {
    * 
    * @return
    */
-  public Boolean StopImageInjection() {
-    return Helper.ExecuteMethod(driver, COMMAND_IMAGEINJECTIONSTOP, new HashMap<String, Object>());
+  public Boolean stopImageInjection() {
+    return Helper.executeMethod(driver, COMMAND_IMAGEINJECTIONSTOP, new HashMap<String, Object>());
   }
 
   /**
@@ -473,7 +497,7 @@ public class Application {
    * @param context
    * @return
    */
-  public Boolean SwitchToContext(String context) {
+  public Boolean switchToContext(String context) {
     if (!context.equalsIgnoreCase(CONTEXT_WEB) && !context.equalsIgnoreCase(CONTEXT_NATIVE)
         && !context.equalsIgnoreCase(CONTEXT_VISUAL)) {
       Logger.LogError("Unsupported context value: " + context);
@@ -494,26 +518,26 @@ public class Application {
     return true;
   }
 
-  public Boolean SwitchToWebviewContext() {
-    return SwitchToContext(CONTEXT_WEB);
+  public Boolean switchToWebviewContext() {
+    return switchToContext(CONTEXT_WEB);
   }
 
-  public Boolean SwitchToNativeContext() {
-    return SwitchToContext(CONTEXT_NATIVE);
+  public Boolean switchToNativeContext() {
+    return switchToContext(CONTEXT_NATIVE);
   }
 
-  public Boolean SwitchToVisualContext() {
-    return SwitchToContext(CONTEXT_VISUAL);
+  public Boolean switchToVisualContext() {
+    return switchToContext(CONTEXT_VISUAL);
   }
 
-  public String GetCurrentContextHandle() {
+  public String getCurrentContextHandle() {
     RemoteExecuteMethod executeMethod = new RemoteExecuteMethod(driver);
     String context = (String) executeMethod.execute(DriverCommand.GET_CURRENT_CONTEXT_HANDLE, null);
     Logger.LogError("Current context: " + context);
     return context;
   }
 
-  public List<String> GetContextHandles() {
+  public List<String> getContextHandles() {
     RemoteExecuteMethod executeMethod = new RemoteExecuteMethod(driver);
     List<String> contexts = (List<String>) executeMethod.execute(DriverCommand.GET_CONTEXT_HANDLES, null);
     Logger.LogInfo("List of available contexts: " + String.join(", ", contexts));
@@ -521,17 +545,17 @@ public class Application {
     return contexts;
   }
 
-  public Boolean StartObjectOptimization(Integer maxChildNodes) {
+  public Boolean startObjectOptimization(Integer maxChildNodes) {
     Map<String, Object> params = new HashMap<>();
     params.put("children", maxChildNodes);
-    return Helper.ExecuteMethod(driver, "mobile:objects.optimization:start", params);
+    return Helper.executeMethod(driver, "mobile:objects.optimization:start", params);
   }
 
-  public Boolean StopObjectOptimization(Integer maxChildNodes) {
-    return Helper.ExecuteMethod(driver, "mobile:objects.optimization:stop", new HashMap<String, Object>());
+  public Boolean stopObjectOptimization(Integer maxChildNodes) {
+    return Helper.executeMethod(driver, "mobile:objects.optimization:stop", new HashMap<String, Object>());
   }
 
-  public Boolean Authenticate(String authType, Boolean success, String errorType) {
+  private Boolean authenticate(String authType, Boolean success, String errorType) {
     Map<String, Object> params = new HashMap<>();
 
     // params = setAppIdOrName(params);
@@ -556,30 +580,30 @@ public class Application {
       params.put("errorType", errorType);
 
     String method = authType == "finger" ? COMMAND_FINGERPRINT_AUTHENTICATE : COMMAND_SENSOR_AUTHENTICATE;
-    return Helper.ExecuteMethod(driver, method, params);
+    return Helper.executeMethod(driver, method, params);
   }
 
-  public Boolean SensorAuthenticate(Boolean success, String errorType) {
-    return Authenticate("sensor", success, errorType);
+  public Boolean sensorAuthenticate(Boolean success, String errorType) {
+    return authenticate("sensor", success, errorType);
   }
 
-  public Boolean SensorAuthenticate() {
-    return Authenticate("sensor", true, null);
+  public Boolean sensorAuthenticate() {
+    return authenticate("sensor", true, null);
   }
 
-  public Boolean SensorAuthenticateFail(String errorType) {
-    return Authenticate("sensor", false, errorType);
+  public Boolean sensorAuthenticateFail(String errorType) {
+    return authenticate("sensor", false, errorType);
   }
 
-  public Boolean FingerAuthenticate(Boolean success, String errorType) {
-    return Authenticate("finger", success, errorType);
+  public Boolean fingerAuthenticate(Boolean success, String errorType) {
+    return authenticate("finger", success, errorType);
   }
 
-  public Boolean FingerAuthenticate() {
-    return Authenticate("finger", true, null);
+  public Boolean fingerAuthenticate() {
+    return authenticate("finger", true, null);
   }
 
-  public Boolean FingerAuthenticateFail(String errorType) {
-    return Authenticate("finger", false, errorType);
+  public Boolean fingerAuthenticateFail(String errorType) {
+    return authenticate("finger", false, errorType);
   }
 }

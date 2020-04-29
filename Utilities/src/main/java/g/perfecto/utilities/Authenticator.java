@@ -25,7 +25,7 @@ public class Authenticator {
         tokensObj = new JSONObject(jsonString);
       }
     } catch (JsonException je) {
-      System.out.println("ERROR! The file " + tokensFilePath + " does not contain a valid JSON object!");
+      Logger.LogError("The file " + tokensFilePath + " does not contain a valid JSON object!");
       je.printStackTrace();
     } catch (Exception e) {
       e.printStackTrace();
@@ -34,15 +34,20 @@ public class Authenticator {
   }
 
   public static String getTokenForCloud(String host) {
+    String token = null;
+    int count = 0;
     JSONArray tokens = getTokensObject().getJSONArray("tokens");
     for (int i = 0; i < tokens.length(); i++) {
       JSONObject t = tokens.getJSONObject(i);
       String key = t.keys().next();
       if (key.equals(host)) {
-        System.out.println("Found token for " + host + " cloud!");
-        return t.getString(key);
+        Logger.LogDebug("Found token for " + host + " cloud!");
+        token = t.getString(key);
+        count++;
       }
     }
-    return null;
+    if (count > 1)
+      Logger.LogWarning("Multiple tokens found for cloud " + host);
+    return token;
   }
 }

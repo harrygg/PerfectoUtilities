@@ -2,12 +2,30 @@ package g.perfecto.utilities;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.List;
+
+import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
 
 public class Logger
 {
 
   int level = 4;
 
+  private final static List VALID_LEVELS = Arrays.asList("TRACE", "DEBUG", "INFO", "WARN", "ERROR");
+
+  public Logger(String logLevel)
+  {
+//    LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+//    ch.qos.logback.classic.Logger logger = loggerContext.getLogger("g.perfecto.utilities");
+//    System.out.println("g.perfecto.utilities" + " current logger level: " + logger.getLevel());
+
+//    logger.setLevel(Level.toLevel(logLevel));
+  }
+  
   public static void Log(Integer level, String data)
   {
     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss.SSS");  

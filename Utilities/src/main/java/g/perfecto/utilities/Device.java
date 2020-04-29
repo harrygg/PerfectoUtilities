@@ -1,4 +1,5 @@
 package g.perfecto.utilities;
+import java.io.File;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,45 +12,31 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 public class Device {
 
   private RemoteWebDriver driver = null;
-  private Map<String, Object> params = new HashMap<>();
+  
+  public String target;
 
-  public String target = null;
-  private final String[] targets = new String[] {"all", "menu", "position"};
+  public Integer tail;
+  public String operation;
+  public static final String ROTATE_OPERATION_RESET = "reset";
+  public static final String ROTATE_OPERATION_NEXT = "next";
+  public String state;
+  public static final String ROTATE_STATE_PORTRAIT = "portrait";
+  public static final String ROTATE_STATE_LANDSCAPE = "landscape";
+  public String method;
+  public static final String ROTATE_METHOD_DEVICE = "device";
+  public static final String ROTATE_METHOD_VIEW = "view";
+  public Integer timeout;
 
-  public int tail = 1000;
-  public String operation = null;
-  public final String ROTATE_OPERATION_RESET = "reset";
-  public final String ROTATE_OPERATION_NEXT = "next";
-  public String state = null;
-  public final String ROTATE_STATE_PORTRAIT = "portrait";
-  public final String ROTATE_STATE_LANDSCAPE = "landscape";
-  public String method = null;
-  public final String ROTATE_METHOD_DEVICE = "device";
-  public final String ROTATE_METHOD_VIEW = "view";
-  public int timeout = 10;
-
-  private final String COMMAND_MOBILEREADY = "mobile:handset:ready";
-  private final String COMMAND_REBOOT = "mobile:handset:reboot";
-  private final String COMMAND_RECOVER = "mobile:handset:recover";
-  private final String COMMAND_GETLOG = "mobile:device:log";
-  private final String COMMAND_ROTATE = "mobile:device:rotate";
-  private final String COMMAND_LOCK = "mobile:screen:lock";
-  private final String COMMAND_DEVICEINFO = "mobile:device:info";
-  private final String COMMAND_SETLOCATION = "mobile:location:set";
-  private final String COMMAND_GETLOCATION = "mobile:location:get";
-  private final String COMMAND_RESETLOCATION = "mobile:location:reset";
-  private final String COMMAND_GATEWAYCALL = "mobile:gateway:call";
-  private final String COMMAND_GATEWAYEMAIL = "mobile:gateway:email";
-  private final String COMMAND_GATEWAYSMS = "mobile:gateway:sms";
-  private final String COMMAND_INJECTAUDIO = "mobile:audio:inject";
-  private final String COMMAND_AUDIORECORDINGSTART = "mobile:audio.recording:start";
-  private final String COMMAND_AUDIORECORDINGSTOP = "mobile:audio.recording:stop";
-  private final String COMMAND_TEXTTOAUDIO = "mobile:text:audio";
-  private final String COMMAND_VOICEASSIST = "mobile:voice:assist";
-  private final String COMMAND_AUDIOVALIDATION = "mobile:audio:validation";
-  private final String COMMAND_AUDIOTEXTVALIDATION = "mobile:audio-text:validation";
-  private final String COMMAND_AUDIOTOTEXT = "mobile:audio:text";
-
+  private final static String COMMAND_MOBILE_READY = "mobile:handset:ready";
+  private final static String COMMAND_REBOOT = "mobile:handset:reboot";
+  private final static String COMMAND_RECOVER = "mobile:handset:recover";
+  private final static String COMMAND_GETLOG = "mobile:device:log";
+  private final static String COMMAND_ROTATE = "mobile:device:rotate";
+  private final static String COMMAND_LOCK = "mobile:screen:lock";
+  private final static String COMMAND_DEVICE_INFO = "mobile:device:info";
+  private final static String COMMAND_SET_LOCATION = "mobile:location:set";
+  private final static String COMMAND_GET_LOCATION = "mobile:location:get";
+  private final static String COMMAND_RESET_LOCATION = "mobile:location:reset";
 
   public static final String AUDIO_LANGUAGE_ENGLISH_US = "us-english";
   public static final String AUDIO_LANGUAGE_ENGLISH_UK = "uk-english";
@@ -66,17 +53,14 @@ public class Device {
   public static final String AUDIO_PROFILE_ACCURACY = "accuracy";
   public static final String AUDIO_SILENCE_TRIMMING_TYPE_ABSOLUTE = "absolute";
   public static final String AUDIO_SILENCE_TRIMMING_TYPE_RELATIVE = "relative";
-  private static final String[] AUDIO_SILENCE_TRIMMING_TYPES = new String[] {AUDIO_SILENCE_TRIMMING_TYPE_ABSOLUTE, AUDIO_SILENCE_TRIMMING_TYPE_RELATIVE}; 
   public static final String AUDIO_VALIDATION_PROFILE_VOIP = "voip";
   public static final String AUDIO_VALIDATION_PROFILE_BASIC = "basic";
   public static final String AUDIO_VALIDATION_PROFILE_VOLTE = "volte";
   public static final String AUDIO_VALIDATION_PROFILE_VOIPE_RMS = "voip_rms";
-  private static final String[] AUDIO_VALIDATION_PROFILES = new String[] {AUDIO_VALIDATION_PROFILE_VOIP, AUDIO_VALIDATION_PROFILE_BASIC, AUDIO_VALIDATION_PROFILE_VOLTE, AUDIO_VALIDATION_PROFILE_VOIPE_RMS};
 
   public static final String AUDIO_TARGET_ASIS = "as-is";
   public static final String AUDIO_TARGET_ALL = "all";
   public static final String AUDIO_TARGET_ANY = "any";
-  private static final String[] AUDIO_TARGETS = new String[] { AUDIO_TARGET_ALL, AUDIO_TARGET_ANY, AUDIO_TARGET_ASIS };
 
   public static final String AUDIO_MATCH_MODE_CONTAIN = "contain";
   public static final String AUDIO_MATCH_MODE_EQUAL = "equal";
@@ -85,92 +69,88 @@ public class Device {
   public static final String AUDIO_MATCH_MODE_FIRST = "first";
   public static final String AUDIO_MATCH_MODE_LAST = "last";
   public static final String AUDIO_MATCH_MODE_INDEX = "index";
-  public static final String[] AUDIO_MATCH_MODES = new String[]{ AUDIO_MATCH_MODE_CONTAIN, AUDIO_MATCH_MODE_EQUAL, AUDIO_MATCH_MODE_STARTWITH, AUDIO_MATCH_MODE_ENDWIDTH, AUDIO_MATCH_MODE_FIRST, AUDIO_MATCH_MODE_LAST, AUDIO_MATCH_MODE_INDEX};
-
-
+  
   public Device(RemoteWebDriver driver)
   {
+    Logger.LogDebug("Creating Device object");
     this.driver = driver;
   }
 
-  public Boolean Ready()
+  /**
+   * For iOS and Android devices, the device is unlocked and returned to its default rotate orientation. 
+   * For example, iPhone devices are returned to portrait mode and iPad devices to landscape mode.
+   * @return
+   */
+  public Boolean ready()
   {
     Map<String, Object> params = new HashMap<>();
 
-    if (target != null && Arrays.asList(targets).contains(target))
+    if (target != null)
       params.put("target", this.target);
-    else
-      System.out.println("WARNING! Unsupported analysis type '" + target + "'. Possible values are: " + String.join(", ", targets));
 
-    try {
-      driver.executeScript(COMMAND_MOBILEREADY, params);
-    } catch (Exception ex)
-    {
-      System.out.println("Failed to execute " + COMMAND_MOBILEREADY);
-      ex.printStackTrace(); 
-      return false;
-    }
-    return true;
+    return Helper.executeMethod(driver, COMMAND_MOBILE_READY, params);
   }
 
-  public Boolean Ready(String target)
+  /**
+   * For iOS and Android devices, the device is unlocked and returned to its default rotate orientation. 
+   * For example, iPhone devices are returned to portrait mode and iPad devices to landscape mode.
+   * @param target Specify what should be reset - menu navigation state, device orientation, or both.
+   * @return
+   */
+  public Boolean ready(String target)
   {
     this.target = target;
-    return Ready();
+    return ready();
   }
 
-
-  public Boolean Reboot()
+  /**
+   * Reboots the device and returns it to the unlocked state. Performed by software reset for Android and iOS devices.
+   * @return
+   */
+  public Boolean reboot()
   {
-    try {
-      driver.executeScript(COMMAND_REBOOT, new HashMap<>());
-    } catch (Exception ex)
-    {
-      System.out.println("Failed to execute " + COMMAND_REBOOT);
-      ex.printStackTrace(); 
-      return false;
-    }
-    return true;
+    return Helper.executeMethod(driver, COMMAND_REBOOT, new HashMap<>());
   }
 
 
-
-  public Boolean Recover()
+  /**
+   * Recovers a connected device that is unresponsive. For example, a device with an interrupted video, black screen or touch failure.
+   * @return
+   */
+  public Boolean recover()
   {
-    try {
-      driver.executeScript(COMMAND_RECOVER, new HashMap<>());
-    } catch (Exception ex)
-    {
-      System.out.println("Failed to execute " + COMMAND_RECOVER);
-      ex.printStackTrace(); 
-      return false;
-    }
-    return true;
+    return Helper.executeMethod(driver, COMMAND_RECOVER, new HashMap<>());
   }
 
-  public Boolean GetLog()
+  /**
+   * Retrieves the Perfecto Lab system log relevant to the device.
+   * @return Device log returned as String
+   */
+  public String getLog()
   {
     Map<String, Object> params = new HashMap<>();
-    params.put("tail", tail);
-
-    try {
-      driver.executeScript(COMMAND_GETLOG, params);
-    } catch (Exception ex)
-    {
-      System.out.println("Failed to execute " + COMMAND_GETLOG);
-      ex.printStackTrace(); 
-      return false;
-    }
-    return true;
+    if (tail != null)
+      params.put("tail", tail);
+    return Helper.executeMethodString(driver, COMMAND_GETLOG, params);
   }
 
-  public Boolean GetLog(int tail)
+  /**
+   * Retrieves the Perfecto Lab system log relevant to the device.
+   * @param tail The number of lines to retrieve from the log. This number of lines will be retrieved from the end of the log
+   * Effective values are in the range of 0-1000
+   * @return Device log returned as String
+   */
+  public String getLog(int tail)
   {
     this.tail = tail;
-    return GetLog();
+    return getLog();
   }
 
-  public Boolean Rotate()
+  /**
+   * Rotates the device to either landscape or portrait.
+   * @return
+   */
+  public Boolean rotate()
   {
     Map<String, Object> params = new HashMap<>();
 
@@ -189,289 +169,295 @@ public class Device {
     else
       System.out.println("WARNING! Unsupported method value '" + method + "'. Possible values are: " + ROTATE_METHOD_DEVICE + " or " + ROTATE_METHOD_VIEW);
 
-    try {
-      driver.executeScript(COMMAND_ROTATE, params);
-    } catch (Exception ex)
-    {
-      System.out.println("Failed to execute " + COMMAND_ROTATE);
-      ex.printStackTrace(); 
-      return false;
-    }
-    return true;
+    return Helper.executeMethod(driver, COMMAND_ROTATE, params);
   }
 
-  public Boolean ResetOrientation()
+  /**
+   * Resets the device orientation.
+   * @return
+   */
+  public Boolean resetOrientation()
   {
     Map<String, Object> params = new HashMap<>();
     params.put("orientation", ROTATE_OPERATION_RESET);
-
-    try {
-      driver.executeScript(COMMAND_ROTATE, params);
-    } catch (Exception ex)
-    {
-      System.out.println("Failed to execute " + COMMAND_ROTATE);
-      ex.printStackTrace(); 
-      return false;
-    }
-    return true;
+    return Helper.executeMethod(driver, COMMAND_ROTATE, params);
   }
 
-  public Boolean RotateNext()
+  /**
+   * rotate the device to its next state
+   * @return
+   */
+  public Boolean rotateNext()
   {
     Map<String, Object> params = new HashMap<>();
     params.put("orientation", ROTATE_OPERATION_NEXT);
-
-    try {
-      driver.executeScript(COMMAND_ROTATE, params);
-    } catch (Exception ex)
-    {
-      System.out.println("Failed to execute " + COMMAND_ROTATE);
-      ex.printStackTrace(); 
-      return false;
-    }
-    return true;
+    return Helper.executeMethod(driver, COMMAND_ROTATE, params);
   }
 
-  public Boolean RotateNext(String method)
+  /**
+   * rotate the device to its next state
+   * @param method The rotation method. device | view
+   * @return
+   */
+  public Boolean rotateNext(String method)
   {
     if (method == ROTATE_METHOD_DEVICE || method == ROTATE_METHOD_VIEW)
       this.method = method;
-    return RotateNext();
+    return rotateNext();
   }
 
-  public Boolean RotateToPortrait()
+  /**
+   * rotates the device to portrait mode.
+   * @return
+   */
+  public Boolean rotateToPortrait()
   {
     Map<String, Object> params = new HashMap<>();
     params.put("state", ROTATE_STATE_PORTRAIT);
-
-    try {
-      driver.executeScript(COMMAND_ROTATE, params);
-    } catch (Exception ex)
-    {
-      System.out.println("Failed to execute " + COMMAND_ROTATE);
-      ex.printStackTrace(); 
-      return false;
-    }
-    return true;
+    return Helper.executeMethod(driver, COMMAND_ROTATE, params);
   }
 
-  public Boolean RotateToPortait(String method) {
+  /**
+   * rotates the device to portrait mode using method device | view
+   * @param method
+   * @return
+   */
+  public Boolean rotateToPortait(String method) {
     if (method == ROTATE_METHOD_DEVICE || method == ROTATE_METHOD_VIEW)
       this.method = method;
-    return RotateToPortrait();
+    return rotateToPortrait();
   }
 
-  public Boolean RotateToLandscape()
+  /**
+   * Rotates device to landscape mode
+   * @return
+   */
+  public Boolean rotateToLandscape()
   {
     Map<String, Object> params = new HashMap<>();
     params.put("state", ROTATE_STATE_LANDSCAPE);
-
-    try {
-      driver.executeScript(COMMAND_ROTATE, params);
-    } catch (Exception ex)
-    {
-      System.out.println("Failed to execute " + COMMAND_ROTATE);
-      ex.printStackTrace(); 
-      return false;
-    }
-    return true;
+    return Helper.executeMethod(driver, COMMAND_ROTATE, params);
   }
-
-  public Boolean RotateToLandscape(String method) {
+  
+  /**
+   * Rotates device to landscape mode
+   * @return
+   */
+  public Boolean rotateToLandscape(String method) {
     if (method == ROTATE_METHOD_DEVICE || method == ROTATE_METHOD_VIEW)
       this.method = method;
-    return RotateToLandscape();
+    return rotateToLandscape();
   }
 
-  public Boolean Lock()
+  /**
+   * Locks the device screen for a set number of seconds, check instantly how your app behaves when the screen is locked.
+   * @return
+   */
+  public Boolean lock()
   {
     Map<String, Object> params = new HashMap<>();
 
-    if (timeout != 10)
+    if (timeout != null)
       params.put("timeout", timeout);
 
-    try {
-      driver.executeScript(COMMAND_LOCK, params);
-    } catch (Exception ex)
-    {
-      System.out.println("Failed to execute " + COMMAND_LOCK);
-      ex.printStackTrace(); 
-      return false;
-    }
-    return true;
+    return Helper.executeMethod(driver, COMMAND_LOCK, params);
   }
 
-  public Boolean Lock(int timeout)
+  /**
+   * Locks the device screen for a set number of seconds, check instantly how your app behaves when the screen is locked.
+   * @param timeout Time, in seconds, to lock device (default: 10)
+   * @return
+   */
+  public Boolean lock(int timeout)
   {
     this.timeout = timeout;
-    return Lock();
+    return lock();
   }
 
-  public String GetManifacturer() {
-    return GetInfo("manifacturer");
+  public String getManifacturer() {
+    return getInfo("manifacturer");
   }
 
-  public String GetModel() {
-    return GetInfo("model");
+  public String getModel() {
+    return getInfo("model");
   }
 
-
-  public String GetPhoneNumber() {
-    return GetInfo("phoneNumber");
+  public String getPhoneNumber() {
+    return getInfo("phoneNumber");
   }
 
-  public String GetDeviceId() {
-    return GetInfo("deviceId");
+  public String getDeviceId() {
+    return getInfo("deviceId");
   }
 
-  public String GetResolution() {
-    return GetInfo("resolution");
+  public String getResolution() {
+    return getInfo("resolution");
   }
 
-  public String GetResolutionWidth()
+  public String getResolutionWidth()
   {
-    return GetInfo("resolutionWidth");
+    return getInfo("resolutionWidth");
   }
 
-  public String GetResolutionHeight()
+  public String getResolutionHeight()
   {
-    return GetInfo("resolutionHeight");
+    return getInfo("resolutionHeight");
   }
 
-  public String GetOs()
+  public String getOs()
   {
-    return GetInfo("os");
+    return getInfo("os");
   }
 
-  public String GetOsVersion()
+  public String getOsVersion()
   {
-    return GetInfo("osVersion");
+    return getInfo("osVersion");
   }
 
-  public String GetFirmware()
+  public String getFirmware()
   {
-    return GetInfo("firmware");
+    return getInfo("firmware");
   }
 
-  public String GetNetwork()
+  public String getNetwork()
   {
-    return GetInfo("network ");
+    return getInfo("network ");
   }
 
-  public String GetDistributer()
+  public String getDistributer()
   {
-    return GetInfo("distributer");
+    return getInfo("distributer");
   }
 
-  public String GetImsi()
+  public String getImsi()
   {
-    return GetInfo("imsi");
+    return getInfo("imsi");
   }
 
-  public String GetNativeImei()
+  public String getNativeImei()
   {
-    return GetInfo("nativeImei");
+    return getInfo("nativeImei");
   }
 
-  public String GetMac()
+  public String getMac()
   {
-    return GetInfo("wifiMacAddress");
+    return getInfo("wifiMacAddress");
   }
 
-  public String GetCradleId()
+  public String getCradleId()
   {
-    return GetInfo("cradleId");
+    return getInfo("cradleId");
   }
 
   public Boolean IsInUse()
   {
-    return GetInfo("inUse").equalsIgnoreCase("true");
+    return getInfo("inUse").equalsIgnoreCase("true");
   }
 
-  public String GetPosition()
+  public String getPosition()
   {
-    return GetInfo("position");
+    return getInfo("position");
   }
 
-  public String GetMethod()
+  public String getMethod()
   {
-    return GetInfo("method");
+    return getInfo("method");
   }
 
-  public String GetRotation()
+  public String getRotation()
   {
-    return GetInfo("rotation");
+    return getInfo("rotation");
   }
 
-  public String GetLocked()
+  public String getLocked()
   {
-    return GetInfo("locked");
+    return getInfo("locked");
   }
 
-  public String GetRoles()
+  public String getRoles()
   {
-    return GetInfo("roles");
+    return getInfo("roles");
   }
 
-  public String GetCurrentActivity()
+  public String getCurrentActivity()
   {
-    return GetInfo("currentActivity");
+    return getInfo("currentActivity");
   }
 
-  public String GetCurrentPackage()
+  public String getCurrentPackage()
   {
-    return GetInfo("currentPackage");
+    return getInfo("currentPackage");
   }
 
-  public String GetAll()
+  public String getAll()
   {
-    return GetInfo("all");
+    return getInfo("all");
   }
 
   public Boolean HasAudio() 
   {
-    return GetInfo("hasAudio").equalsIgnoreCase("true");
+    return getInfo("hasAudio").equalsIgnoreCase("true");
   }
 
-  public String GetAutomationInfrastructure()
+  public String getAutomationInfrastructure()
   {
-    return GetInfo("automationInfrastructure");
+    return getInfo("automationInfrastructure");
   }
 
-  public String GetLocation()
+  /**
+   * Retrieves the current location of the device, The location is returned as a Latitude, Longitude pair.
+   * @return
+   */
+  public String getLocation()
   {
-    return Helper.ExecuteMethodString(driver, COMMAND_GETLOCATION, new HashMap<String, Object>());
+    return Helper.executeMethodString(driver, COMMAND_GET_LOCATION, new HashMap<String, Object>());
   }
 
-  public Boolean SetLocationByCoordinates(String coordinates)
+  /**
+   * Sets the device location. 
+   * @param coordinates The latitude and longitude coordinate of the device location to set. 
+   * Example: 43.642659,-79.387050
+   * @return
+   */
+  public Boolean setLocationByCoordinates(String coordinates)
   {
     Map<String, Object> params = new HashMap<>();
     params.put("coordinates", coordinates);
-    return Helper.ExecuteMethod(driver, COMMAND_SETLOCATION, params);
+    return Helper.executeMethod(driver, COMMAND_SET_LOCATION, params);
   }
 
-  public Boolean SetLocationByAddress(String address)
+  /**
+   * Sets the device location.
+   * @param address The address location to set. Format: Google Geocoding. 
+   * Example: 1600 Amphitheatre Parkway, Mountain View, CA
+   * @return
+   */
+  public Boolean setLocationByAddress(String address)
   {
     Map<String, Object> params = new HashMap<>();
     params.put("address", address);
-    return Helper.ExecuteMethod(driver, COMMAND_SETLOCATION, params);
+    return Helper.executeMethod(driver, COMMAND_SET_LOCATION, params);
   }
 
   /**
    * Resets the device location to its actual location. Used alongside the Set device location function. Supported only on Android!
    * @return
    */
-  public Boolean ResetLocation()
+  public Boolean resetLocation()
   {
-    Map<String, Object> params = new HashMap<>();
-    return Helper.ExecuteMethod(driver, COMMAND_RESETLOCATION, new HashMap<String, Object>());
+    return Helper.executeMethod(driver, COMMAND_RESET_LOCATION, new HashMap<String, Object>());
   }
 
-  private String GetInfo(String param)
+  /**
+   * Retrieves the specified device property and inserts its value into a defined variable. Use the Property parameter to specify the device property to retrieve.
+   * @param param
+   * @return
+   */
+  public String getInfo(String param)
   {
     Map<String, Object> params = new HashMap<>();
     params.put("property", param);
-    return Helper.ExecuteMethodString(driver, COMMAND_DEVICEINFO, params);
+    return Helper.executeMethodString(driver, COMMAND_DEVICE_INFO, params);
   }
 
   /**
@@ -484,30 +470,30 @@ public class Device {
    * @param profile Profile of the NLP network
    * @return
    */
-  public String AudioToText(String pathToAudio, String language, String phrase, String rate, String profile)
+  public String audioToText(String pathToAudio, String language, String phrase, String rate, String profile)
   {
     Audio au = new Audio(driver);
-    return au.ToText(pathToAudio, language, phrase, rate, profile);		
+    return au.toText(pathToAudio, language, phrase, rate, profile);		
   }
 
-  public String AudioToText(String pathToAudio, String lanuage, String phrase, String rate)
+  public String audioToText(String pathToAudio, String lanuage, String phrase, String rate)
   {
-    return AudioToText(pathToAudio, lanuage, phrase, rate, null);
+    return audioToText(pathToAudio, lanuage, phrase, rate, null);
   }
 
-  public String AudioToText(String pathToAudio, String lanuage, String phrase)
+  public String audioToText(String pathToAudio, String lanuage, String phrase)
   {
-    return AudioToText(pathToAudio, lanuage, phrase, null, null);
+    return audioToText(pathToAudio, lanuage, phrase, null, null);
   }
 
-  public String AudioToText(String pathToAudio, String language)
+  public String audioToText(String pathToAudio, String language)
   {
-    return AudioToText(pathToAudio, language, null, null, null);
+    return audioToText(pathToAudio, language, null, null, null);
   }
 
-  public String AudioToText(String pathToAudio)
+  public String audioToText(String pathToAudio)
   {
-    return AudioToText(pathToAudio, null, null, null, null);
+    return audioToText(pathToAudio, null, null, null, null);
   }
 
   /**
@@ -519,20 +505,20 @@ public class Device {
    * @param isFemale Indicates the gender voice to use in the audio result file.
    * @return
    */
-  public String TextToAudio(String text, String repositoryFile, String language, Boolean isFemale)
+  public String textToAudio(String text, String repositoryFile, String language, Boolean isFemale)
   {
     Audio au = new Audio(driver);
-    return au.FromText(text, repositoryFile, language, isFemale);
+    return au.fromText(text, repositoryFile, language, isFemale);
   }
 
-  public String TextToAudio(String text, String repositoryFile, String language)
+  public String textToAudio(String text, String repositoryFile, String language)
   {
-    return TextToAudio(text, repositoryFile, language, null);
+    return textToAudio(text, repositoryFile, language, null);
   }
 
-  public String TextToAudio(String text, String repositoryFile)
+  public String textToAudio(String text, String repositoryFile)
   {
-    return TextToAudio(text, repositoryFile, null, null);
+    return textToAudio(text, repositoryFile, null, null);
   }
 
   /**
@@ -548,40 +534,40 @@ public class Device {
    * @param generic A generic audio parameter.
    * @return
    */
-  public String ValidateAudio(String deviceAudio, String repositoryKey, Double treshold, String profile, String silenceTrimmingType, Double silenceTrimmingLevel, String calibration, String generic)
+  public String validateAudio(String deviceAudio, String repositoryKey, Double treshold, String profile, String silenceTrimmingType, Double silenceTrimmingLevel, String calibration, String generic)
   {
     Audio au = new Audio(driver);
-    return au.ValidateAudio(deviceAudio, repositoryKey, treshold, profile, silenceTrimmingType, silenceTrimmingLevel, calibration, generic);
+    return au.validateAudio(deviceAudio, repositoryKey, treshold, profile, silenceTrimmingType, silenceTrimmingLevel, calibration, generic);
   }
 
-  public String ValidateAudio(String deviceAudio, String repositoryKey, Double treshold, String profile, String silenceTrimmingType, Double silenceTrimmingLevel, String calibration)
+  public String validateAudio(String deviceAudio, String repositoryKey, Double treshold, String profile, String silenceTrimmingType, Double silenceTrimmingLevel, String calibration)
   {
-    return ValidateAudio(deviceAudio, repositoryKey, treshold, profile, silenceTrimmingType, silenceTrimmingLevel, calibration, null);
+    return validateAudio(deviceAudio, repositoryKey, treshold, profile, silenceTrimmingType, silenceTrimmingLevel, calibration, null);
   }
 
-  public String ValidateAudio(String deviceAudio, String repositoryKey, Double treshold, String profile, String silenceTrimmingType, Double silenceTrimmingLevel)
+  public String validateAudio(String deviceAudio, String repositoryKey, Double treshold, String profile, String silenceTrimmingType, Double silenceTrimmingLevel)
   {
-    return ValidateAudio(deviceAudio, repositoryKey, treshold, profile, silenceTrimmingType, silenceTrimmingLevel, null, null);
+    return validateAudio(deviceAudio, repositoryKey, treshold, profile, silenceTrimmingType, silenceTrimmingLevel, null, null);
   }
 
-  public String ValidateAudio(String deviceAudio, String repositoryKey, Double treshold, String profile, String silenceTrimmingType)
+  public String validateAudio(String deviceAudio, String repositoryKey, Double treshold, String profile, String silenceTrimmingType)
   {
-    return ValidateAudio(deviceAudio, repositoryKey, treshold, profile, silenceTrimmingType, null, null, null);
+    return validateAudio(deviceAudio, repositoryKey, treshold, profile, silenceTrimmingType, null, null, null);
   }
 
   public String ValidateAudio(String deviceAudio, String repositoryKey, Double treshold, String profile)
   {
-    return ValidateAudio(deviceAudio, repositoryKey, treshold, profile, null, null, null, null);
+    return validateAudio(deviceAudio, repositoryKey, treshold, profile, null, null, null, null);
   }
 
   public String ValidateAudio(String deviceAudio, String repositoryKey, Double treshold)
   {
-    return ValidateAudio(deviceAudio, repositoryKey, treshold, null, null, null, null, null);
+    return validateAudio(deviceAudio, repositoryKey, treshold, null, null, null, null, null);
   }
 
-  public String ValidateAudio(String deviceAudio, String repositoryKey)
+  public String validateAudio(String deviceAudio, String repositoryKey)
   {
-    return ValidateAudio(deviceAudio, repositoryKey, null, null, null, null, null, null);
+    return validateAudio(deviceAudio, repositoryKey, null, null, null, null, null, null);
   }
 
   /**
@@ -590,10 +576,10 @@ public class Device {
    * @param wait The execution mode. No wait (default) - continue to the next line in the script immediately
    * @return
    */
-  public Boolean InjectAudio(String key, Boolean wait)
+  public Boolean injectAudio(String key, Boolean wait)
   {
     Audio au = new Audio(driver);
-    return au.Inject(key, wait);
+    return au.inject(key, wait);
   }
 
   /**
@@ -603,7 +589,7 @@ public class Device {
    */
   public Boolean InjectAudio(String key)
   {
-    return InjectAudio(key, null);
+    return injectAudio(key, null);
   }
 
 
@@ -611,18 +597,18 @@ public class Device {
    * Command starts recording the audio output from the device and creates a WAV file. The file is saved in the media storage server. 
    * @return A URL to the file location is returned in the response to the command
    */
-  public String StartAudioRecording()
+  public String startAudioRecording()
   {
-    return new Audio(driver).StartRecording();
+    return new Audio(driver).startRecording();
   }
 
   /**
    * Command stops recording the audio output from the device, closes the file, and stores in the media storage server at the URL declared at the start of audio recording.
    * @return
    */
-  public String StopAudioRecording()
+  public String stopAudioRecording()
   {
-    return new Audio(driver).StopRecording();
+    return new Audio(driver).stopRecording();
   }
 
   /**
@@ -644,74 +630,106 @@ public class Device {
    * @param phrase Provides a list of phrases for speech-to-text library to use to avoid confusion. For example, provide the words:�two� and �four� to avoid confusion with �to� and �for�.
    * @return
    */
-  public Boolean ValidateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words, String exact, Double threshold, Integer confidence, String language, String rate, String profile, List<String> phrases)
+  public Boolean validateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words, String exact, Double threshold, Integer confidence, String language, String rate, String profile, List<String> phrases)
   {
-    return new Audio(driver).ValidateAudioToText(content, audioInput, target, match, index, words, exact, threshold, confidence, language);
+    return new Audio(driver).validateAudioToText(content, audioInput, target, match, index, words, exact, threshold, confidence, language);
   }
 
-  public Boolean ValidateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words, String exact, Double threshold, Integer confidence, String language, String rate, String profile)
+  public Boolean validateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words, String exact, Double threshold, Integer confidence, String language, String rate, String profile)
   {
-    return ValidateAudioToText(content, audioInput, target, match, index, words, exact, threshold, confidence, language, rate, profile, null);
+    return validateAudioToText(content, audioInput, target, match, index, words, exact, threshold, confidence, language, rate, profile, null);
   }
 
-  public Boolean ValidateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words, String exact, Double threshold, Integer confidence, String language, String rate)
+  public Boolean validateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words, String exact, Double threshold, Integer confidence, String language, String rate)
   {
-    return ValidateAudioToText(content, audioInput, target, match, index, words, exact, threshold, confidence, language, rate, null, null);
+    return validateAudioToText(content, audioInput, target, match, index, words, exact, threshold, confidence, language, rate, null, null);
   }
 
-  public Boolean ValidateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words, String exact, Double threshold, Integer confidence, String language)
+  public Boolean validateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words, String exact, Double threshold, Integer confidence, String language)
   {
-    return ValidateAudioToText(content, audioInput, target, match, index, words, exact, threshold, confidence, language, null, null, null);
+    return validateAudioToText(content, audioInput, target, match, index, words, exact, threshold, confidence, language, null, null, null);
   }
 
-  public Boolean ValidateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words, String exact, Double threshold, Integer confidence)
+  public Boolean validateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words, String exact, Double threshold, Integer confidence)
   {
-    return ValidateAudioToText(content, audioInput, target, match, index, words, exact, threshold, confidence, null, null, null, null);
+    return validateAudioToText(content, audioInput, target, match, index, words, exact, threshold, confidence, null, null, null, null);
   }
 
-  public Boolean ValidateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words, String exact, Double threshold)
+  public Boolean validateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words, String exact, Double threshold)
   {
-    return ValidateAudioToText(content, audioInput, target, match, index, words, exact, threshold, null, null, null, null, null);
+    return validateAudioToText(content, audioInput, target, match, index, words, exact, threshold, null, null, null, null, null);
   }
 
-  public Boolean ValidateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words, String exact)
+  public Boolean validateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words, String exact)
   {
-    return ValidateAudioToText(content, audioInput, target, match, index, words, exact, null, null, null, null, null, null);
+    return validateAudioToText(content, audioInput, target, match, index, words, exact, null, null, null, null, null, null);
   }
 
-  public Boolean ValidateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words)
+  public Boolean validateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words)
   {
-    return ValidateAudioToText(content, audioInput, target, match, index, words, null, null, null, null, null, null, null);
+    return validateAudioToText(content, audioInput, target, match, index, words, null, null, null, null, null, null, null);
   }
 
-  public Boolean ValidateAudioToText(String content, String audioInput, String target, String match, Integer index)
+  public Boolean validateAudioToText(String content, String audioInput, String target, String match, Integer index)
   {
-    return ValidateAudioToText(content, audioInput, target, match, index, null, null, null, null, null, null, null, null);
+    return validateAudioToText(content, audioInput, target, match, index, null, null, null, null, null, null, null, null);
   }
 
-  public Boolean ValidateAudioToText(String content, String audioInput, String target, String match)
+  public Boolean validateAudioToText(String content, String audioInput, String target, String match)
   {
-    return ValidateAudioToText(content, audioInput, target, match, null, null, null, null, null, null, null, null, null);
+    return validateAudioToText(content, audioInput, target, match, null, null, null, null, null, null, null, null, null);
   }
 
-  public Boolean ValidateAudioToText(String content, String audioInput, String target)
+  public Boolean validateAudioToText(String content, String audioInput, String target)
   {
-    return ValidateAudioToText(content, audioInput, target, null, null, null, null, null, null, null, null, null, null);
+    return validateAudioToText(content, audioInput, target, null, null, null, null, null, null, null, null, null, null);
   }
 
-  public Boolean ValidateAudioToText(String content, String audioInput)
+  public Boolean validateAudioToText(String content, String audioInput)
   {
-    return ValidateAudioToText(content, audioInput, null, null, null, null, null, null, null, null, null, null, null);
+    return validateAudioToText(content, audioInput, null, null, null, null, null, null, null, null, null, null, null);
   }
 
-  public Boolean VoiceAssistantInject(String text)
+  public Boolean voiceAssistantInject(String text)
   {
-    return new Audio(driver).VoiceAssistantInject(text);
+    return new Audio(driver).voiceAssistantInject(text);
   }
 
-  public String TakeScreenshot()
+  /**
+   * Gets a screenshot from the device as BASE64
+   * @return
+   */
+  public String getScreenshot()
   {
-    Logger.LogInfo("Taking screenshot");
-    return driver.getScreenshotAs(OutputType.BASE64);
+    return new UserActions(driver).takeScreenshot();
   }
+    
+  /**
+   * Gets a screenshot from the device as base64
+   * @return
+   */
+  public String getScreenshotAsBase64()
+  {
+    return new UserActions(driver).takeScreenshot();
+  }
+  
+ 
+  /**
+   * Gets a screenshot from the device as File
+   * @return
+   */
+  public File getScreenshotAsFile()
+  {
+    return new UserActions(driver).takeScreenshotAsFile();
+  }
+  
+  /**
+   * Gets a screenshot from the device as Bytes
+   * @return
+   */
+  public byte[] getScreenshotAsBytes()
+  {
+    return new UserActions(driver).takeScreenshotAsBytes();
+  }
+  
 }

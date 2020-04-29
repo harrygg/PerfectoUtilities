@@ -8,81 +8,175 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 
 public class VisualAnalysis {
 
-  private RemoteWebDriver driver = null;
+  private RemoteWebDriver driver;
   private Map<String, Object> params = new HashMap<>();
 
-  public String label = null;
+  public String label;
   public String text = "";
-  public int treshold = 80;
-  public int index = 1;
-  public Boolean ignoreCase = false;
-  public Boolean scroll = false;
-  public int maxScroll = 5;
-  public String next = "";
-  public String backlight = null;
-  public String source = VisualAnalysisParameters.SOURCE_DEFAULT;
-  public Boolean words = false;
-  public Boolean ignoreSpace = false;
-  public Boolean ignorePunct = false;
-  public String analysis = null;
-  public String language = null;
-  public String scope = null;
-  public String caps = null;
-  public String labelDirection = null;
-  public String labelOffset = null;
-  public String screenTop = null;
-  public String screenHeight = null;
-  public String screenLeft = null;
-  public String screenWidth = null;
-  public String match = null;
-  public String textMatch = null;
-  public String operation = null;
-  public int repeat = 1;
-  public String inverse = null;
-  public String policy = null;
-  public String relationDirection = null;
-  public String relationInline = null;
-  public String reportResolution = null;
-  public String grid = null;
-  public String ocr = null;
-  public String imageTop = null;
-  public String imageHeight = null;
-  public String imageLeft = null;
-  public String imageWidth = null;
-  public int imageBoundNeedleBound = 100;
-  public int imageBoundHeystackArea = 786432;
-  public String matchGeneric = null;
-  public String profile = null;
-  public String shift = null;
-  public String offset = null;
-  public String content = null;
-  public String xAlignment = null;
-  public String yAlignment = null;
-  public String xWidth = null;
-  public String yHeight = null;
-  public String context = null;
-  public int lines = -1;
-  public int timeout = -1;
-  public int interval = 0;
-  public String measurement = null;
-  public String key = null;
+  public Integer treshold;
+  public Integer index;
+  public Boolean ignoreCase;
+  public Boolean scroll;
+  public Integer maxScroll;
+  public String next;
+  public static final String NEXT_SWIPE_UP = "SWIPE_UP";
+  public static final String NEXT_SWIPE_DOWN = "SWIPE_DOWN";
+  public static final String NEXT_SWIPE_RIGHT = "SWIPE_RIGHT";
+  public static final String NEXT_SWIPE_LEFT = "SWIPE_LEFT";
+  public String backlight;
+  public String source;
+  public static final String SOURCE_PRIMARY = "primary";
+  public static final String SOURCE_NATIVE = "native";
+  public static final String SOURCE_CAMERA = "camera";
+  public static final String SOURCE_AUTO = "auto";
+  public static final String SOURCE_SECONDARY = "secondary";
+  public static final String SOURCE_DEFAULT = SOURCE_AUTO;
+  public Boolean words;
+  public Boolean ignoreSpace;
+  public Boolean ignorePunct;
+  public String analysis;
+  public static final String ANALYSIS_FULL = "full";
+  public static final String ANALYSIS_AUTOMATIC = "automatic";
+  public static final String ANALYSIS_MANUAL = "manual";
+  public String language;
+  public static final String LANGUAGE_ENGLISH = "English";
+  public static final String LANGUAGE_DUTCH = "Dutch";
+  public static final String LANGUAGE_FRENCH = "French";
+  public static final String LANGUAGE_GERMAN = "German";
+  public static final String LANGUAGE_ITALIAN = "Italian";
+  public static final String LANGUAGE_SPANISH = "Spanish";
+  public static final String LANGUAGE_PORTUGESE = "PortugeseStandard";
+  public static final String LANGUAGE_RUSSIAN = "Russian";
+  public static final String LANGUAGE_HEBREW = "Hebrew";
+  public String scope;
+  public static final String SCOPE_SENTENCE = "sentence";
+  public static final String SCOPE_CONTACT = "contact";
+  public static final String SCOPE_URL = "url";
+  public static final String SCOPE_NUMBER = "number";
+  public String caps;
+  public String labelDirection;
+  public static final String LABEL_DIRECTION_INSIDE = "inside";
+  public static final String LABEL_DIRECTION_ABOVE = "above";
+  public static final String LABEL_DIRECTION_BELOW = "below";
+  public static final String LABEL_DIRECTION_LEFT = "left";
+  public static final String LABEL_DIRECTION_RIGHT = "right";
+  public static final String LABEL_DIRECTION_LEFTMOST = "leftmost";
+  public static final String LABEL_DIRECTION_RIGHTMOST = "rightmost";
+  public String labelOffset;
+  public String screenTop;
+  public String screenHeight;
+  public String screenLeft;
+  public String screenWidth;
+  public String match;
+  public String textMatch;
+  public static final String TEXT_MATCH_CONTAIN = "contain";
+  public static final String TEXT_MATCH_EQUAL = "equal";
+  public static final String TEXT_MATCH_STARTWITH = "startwith";
+  public static final String TEXT_MATCH_ENDWITH = "endwith";
+  public static final String TEXT_MATCH_FIRST = "first";
+  public static final String TEXT_MATCH_LAST = "last";
+  public static final String TEXT_MATCH_INDEX = "index";
+  public String operation;
+  public static final String OPERATION_SINGLE = "single";
+  public static final String OPERATION_DOUBLE = "double";
+  public static final String OPERATION_LONG = "long";
+  public static final String OPERATION_ROLL = "roll";
+  public static final String OPERATION_NONE = "none";
+  public Integer repeat;
+  public String inverse;
+  public static final String INVERSE_ANY = "any";
+  public static final String INVERSE_YES = "yes";
+  public static final String INVERSE_NO = "no";
+  public String policy;
+  public static final String POLICY_AUTO = "auto";
+  public static final String POLICY_ACCURACY = "accuracy";
+  public static final String POLICY_PERFORMANCE = "performance";
+  public String relationDirection;
+  public static final String RELATION_DIRECTION_LEFT = "left";
+  public static final String RELATION_DIRECTION_RIGHT = "right";
+  public static final String RELATION_DIRECTION_ABOVE = "above";
+  public static final String RELATION_DIRECTION_BELOW = "below";
+  public static final String RELATION_DIRECTION_LEFTABOVE = "left-above";
+  public static final String RELATION_DIRECTION_LEFTBELOW = "left-below";
+  public static final String RELATION_DIRECTION_RIGHTABOVE = "right-above";
+  public static final String RELATION_DIRECTION_RIGHTBELOW = "right-below";
+  public static final String RELATION_DIRECTION_INSIDE = "inside";
+  public String relationInline;
+  public static final String RELATION_INLINE_VALUE_HORIZONTAL = "Horizontal";
+  public static final String RELATION_INLINE_VALUE_VERTICAL = "Vertical";
+  public String reportResolution;
+  public static final String REPORT_RESOLUTION_HIGH = "High";
+  public static final String REPORT_RESOLUTION_MEDIUM = "Medium";
+  public static final String REPORT_RESOLUTION_LOW = "Low";
+  public String grid;
+  public String ocr;
+  public String imageTop;
+  public String imageHeight;
+  public String imageLeft;
+  public String imageWidth;
+  public Integer imageBoundNeedleBound;
+  public Integer imageBoundHeystackArea;
+  public String matchGeneric;
+  public static final String MATCH_GENERIC_TM_SQDIFF_NORMED = "TM_SQDIFF_NORMED";
+  public static final String MATCH_GENERIC_TM_CCORR_NORMED = "TM_CCORR_NORMED";
+  public String profile;
+  public static final String PROFILE_DEFAULT = "default";
+  public static final String PROFILE_DOCUMENTCONVERSION_ACCURACY = "DocumentConversion_Accuracy";
+  public static final String PROFILE_DOCUMENTCONVERSION_SPEED = "DocumentConversion_Speed";
+  public static final String PROFILE_DOCUMENTARCHIVING_ACCURACY = "DocumentArchiving_Accuracy";
+  public static final String PROFILE_DOCUMENTARCHIVING_SPEED= "DocumentArchiving_Speed";
+  public static final String PROFILE_BOOKARCHIVING_ACCURACY = "BookArchiving_Accuracy";
+  public static final String PROFILE_BOOKARCHIVING_SPEED = "BookArchiving_Speed";
+  public static final String PROFILE_TEXTEXTRACTION_ACCURACY = "TextExtraction_Accuracy";
+  public static final String PROFILE_TEXTEXTRACTION_SPEED = "TextExtraction_Speed";
+  public static final String PROFILE_FIELDLEVELRECOGNITION = "FieldLevelRecognition";
+  public static final String PROFILE_BARCODERECOGNITION = "BarcodeRecognition";
+  public String shift;
+  public static final String SHIFT_NONE = "none";
+  public static final String SHIFT_ABOVE = "above";
+  public static final String SHIFT_BELOW = "below";
+  public static final String SHIFT_LEFT = "left";
+  public static final String SHIFT_RIGHT = "right";
+  public static final String SHIFT_LEFMOST = "leftmost";
+  public static final String SHIFT_RIGHTMOST = "rightmost";
+  public String offset;
+  public String content;
+  public String xAlignment;
+  public String yAlignment;
+  public static final String ALIGNMENT_NONE = "none";
+  public static final String ALIGNMENT_LEFT = "left";
+  public static final String ALIGNMENT_CENTER = "center";
+  public static final String ALIGNMENT_RIGHT = "right";
+  public String xWidth;
+  public String yHeight;
+  public String context;
+  public static final String CONTEXT_ALL = "all";
+  public static final String CONTEXT_BODY = "body";
+  public Integer lines;
+  public Integer timeout;
+  public Integer interval;
+  public String measurement;
+  public static final String MEASUREMENT_ROUGH = "rough";
+  public static final String MEASUREMENT_ACCURATE = "accurate";
+  public String key;
 
-  private final String COMMAND_EDITIMAGEGET = "mobile:edit-image:get";
-  private final String COMMAND_EDITIMAGESET = "mobile:edit-image:set";
-  private final String COMMAND_EDITTEXTGET = "mobile:edit-text:get";
-  private final String COMMAND_EDITTEXTSET = "mobile:edit-text:set";
-  private final String COMMAND_IMAGEBUTTONCLICK = "mobile:button-image:click";
-  private final String COMMAND_BUTTONTEXTCLICK = "mobile:button-text:click";
-  private final String COMMAND_IMAGESELECT = "mobile:image:select";
-  private final String COMMAND_TEXTSELECT = "mobile:text:select";
-  private final String COMMAND_CHECKPOINTIMAGE = "mobile:checkpoint:image";
-  private final String COMMAND_CHECKPOINTTEXT = "mobile:checkpoint:text";
-  private final String COMMAND_IMAGEFIND = "mobile:image:find";
-  private final String COMMAND_TEXTFIND = "mobile:text:find";
-  private final String COMMAND_SCREENTEXT = "mobile:screen:text";
+  private final static String COMMAND_EDIT_IMAGE_GET = "mobile:edit-image:get";
+  private final static String COMMAND_EDIT_IMAGE_SET = "mobile:edit-image:set";
+  private final static String COMMAND_EDIT_TEXT_GET = "mobile:edit-text:get";
+  private final static String COMMAND_EDIT_TEXT_SET = "mobile:edit-text:set";
+  private final static String COMMAND_IMAGE_BUTTON_CLICK = "mobile:button-image:click";
+  private final static String COMMAND_BUTTON_TEXT_CLICK = "mobile:button-text:click";
+  private final static String COMMAND_IMAGE_SELECT = "mobile:image:select";
+  private final static String COMMAND_TEXT_SELECT = "mobile:text:select";
+  private final static String COMMAND_CHECKPOINT_IMAGE = "mobile:checkpoint:image";
+  private final static String COMMAND_CHECKPOINT_TEXT = "mobile:checkpoint:text";
+  private final static String COMMAND_IMAGE_FIND = "mobile:image:find";
+  private final static String COMMAND_TEXT_FIND = "mobile:text:find";
+  private final static String COMMAND_SCREENTEXT = "mobile:screen:text";
 
   public VisualAnalysis(RemoteWebDriver driver)
   {
+    Logger.LogDebug("Creating VisualAnalysis object");
     this.driver = driver;
   }
 
@@ -91,17 +185,17 @@ public class VisualAnalysis {
     params.clear();
     label = null;
     text = "";
-    treshold = 80;
-    index = 1;
-    ignoreCase = false;
-    scroll = false;
-    maxScroll = 5;
-    next = "";
+    treshold = null;
+    index = null;
+    ignoreCase = null;
+    scroll = null;
+    maxScroll = null;
+    next = null;
     backlight = null;
-    source = VisualAnalysisParameters.SOURCE_DEFAULT;
-    words = false;
-    ignoreSpace = false;
-    ignorePunct = false;
+    source = null;
+    words = null;
+    ignoreSpace = null;
+    ignorePunct = null;
     analysis = null;
     language = null;
     scope = null;
@@ -115,7 +209,7 @@ public class VisualAnalysis {
     match = null;
     textMatch = null;
     operation = null;
-    repeat = 1;
+    repeat = null;
     inverse = null;
     policy = null;
     relationDirection = null;
@@ -127,8 +221,8 @@ public class VisualAnalysis {
     imageHeight = null;
     imageLeft = null;
     imageWidth = null;
-    imageBoundNeedleBound = 100;
-    imageBoundHeystackArea = 786432;
+    imageBoundNeedleBound = null;
+    imageBoundHeystackArea = null;
     matchGeneric = null;
     profile = null;
     shift = null;
@@ -139,9 +233,9 @@ public class VisualAnalysis {
     xWidth = null;
     yHeight = null;
     context = null;
-    lines = -1;
-    timeout = -1;
-    interval = 0;
+    lines = null;
+    timeout = null;
+    interval = null;
     measurement = null;
     key = null;
   }
@@ -150,14 +244,14 @@ public class VisualAnalysis {
    * Identifies an edit field, based on an image label, and retrieves its text value. The value is returned as a string.
    * @return
    */
-  public String EditImageGet()
+  public String editImageGet()
   {
     params.clear();
-    if (!AddMandatoryParameter("label", label))
+    if (!addMandatoryParameter("label", label))
       return null;
-    SetAdditionalParams();
+    setAdditionalParams();
 
-    return Helper.ExecuteMethodString(driver, COMMAND_EDITIMAGEGET, params);	
+    return Helper.executeMethodString(driver, COMMAND_EDIT_IMAGE_GET, params);	
   }
 
   /**
@@ -165,10 +259,10 @@ public class VisualAnalysis {
    * @param label
    * @return
    */
-  public String EditImageGet(String label)
+  public String editImageGet(String label)
   {
     this.label = label;
-    return EditImageGet();
+    return editImageGet();
   }
 
   /**
@@ -177,25 +271,25 @@ public class VisualAnalysis {
    * @param lines
    * @return
    */
-  public String EditImageGet(String label, int lines)
+  public String editImageGet(String label, int lines)
   {
     this.lines = lines;
-    return EditImageGet(label);
+    return editImageGet(label);
   }
 
   /**
    * Identifies an edit field, based on an image label, and inserts the specified text in the value parameter into the field.
    * @return
    */
-  public Boolean EditImageSet()
+  public Boolean editImageSet()
   {
     params.clear();
-    if (!AddMandatoryParameter("label", label))
+    if (!addMandatoryParameter("label", label))
       return false;
     params.put("text",  text);
-    SetAdditionalParams();
+    setAdditionalParams();
 
-    return Helper.ExecuteMethod(driver, COMMAND_EDITIMAGESET, params);	
+    return Helper.executeMethod(driver, COMMAND_EDIT_IMAGE_SET, params);	
 
   }
 
@@ -205,11 +299,11 @@ public class VisualAnalysis {
    * @param text
    * @return
    */
-  public Boolean EditImageSet(String label, String text)
+  public Boolean editImageSet(String label, String text)
   {
     this.label = label;
     this.text = text;
-    return EditImageSet();
+    return editImageSet();
   }
 
   /**
@@ -219,24 +313,24 @@ public class VisualAnalysis {
    * @param caps
    * @return
    */
-  public Boolean EditImageSet(String label, String text, String caps)
+  public Boolean editImageSet(String label, String text, String caps)
   {
     this.caps = caps;
-    return EditImageSet(label, text);
+    return editImageSet(label, text);
   }
 
   /**
    * Identifies an edit field, based on a text label, and retrieves its value. The value is returned as a string.
    * @return
    */
-  public String EditTextGet()
+  public String editTextGet()
   {
     params.clear();
-    if (!AddMandatoryParameter("label", label))
+    if (!addMandatoryParameter("label", label))
       return null;
-    SetAdditionalParams();
+    setAdditionalParams();
 
-    return Helper.ExecuteMethodString(driver, COMMAND_EDITTEXTGET, params);	
+    return Helper.executeMethodString(driver, COMMAND_EDIT_TEXT_GET, params);	
   }
 
   /**
@@ -244,10 +338,10 @@ public class VisualAnalysis {
    * @param label
    * @return
    */
-  public String EditTextGet(String label)
+  public String editTextGet(String label)
   {
     this.label = label;
-    return EditTextGet();
+    return editTextGet();
   }
 
   /**
@@ -256,10 +350,10 @@ public class VisualAnalysis {
    * @param lines
    * @return
    */
-  public String EditTextGet(String label, int lines)
+  public String editTextGet(String label, int lines)
   {
     this.lines = lines;
-    return EditTextGet(label);
+    return editTextGet(label);
   }
 
   /**
@@ -267,16 +361,16 @@ public class VisualAnalysis {
    * The field is in relation to the found label and is defined by the label position and offset parameters.
    * @return
    */
-  public Boolean EditTextSet()
+  public Boolean editTextSet()
   {
     params.clear();
-    if (!AddMandatoryParameter("label", label))
+    if (!addMandatoryParameter("label", label))
       return false;	
     params.put("text", this.text);
 
-    SetAdditionalParams();
+    setAdditionalParams();
 
-    return Helper.ExecuteMethod(driver, COMMAND_EDITTEXTSET, params);	
+    return Helper.executeMethod(driver, COMMAND_EDIT_TEXT_SET, params);	
   }
 
   /**
@@ -286,11 +380,11 @@ public class VisualAnalysis {
    * @param text
    * @return
    */
-  public Boolean EditTextSet(String label, String text)
+  public Boolean editTextSet(String label, String text)
   {
     this.label = label;
     this.text = text;
-    return EditTextSet();
+    return editTextSet();
   }
 
   /**
@@ -301,10 +395,10 @@ public class VisualAnalysis {
    * @param scope
    * @return
    */
-  public Boolean EditTextSet(String label, String text, String scope)
+  public Boolean editTextSet(String label, String text, String scope)
   {
     this.scope = scope;
-    return EditTextSet(label, text);
+    return editTextSet(label, text);
   }
 
   /**
@@ -316,38 +410,38 @@ public class VisualAnalysis {
    * @param caps
    * @return
    */
-  public Boolean EditTextSet(String label, String text, String scope, String caps)
+  public Boolean editTextSet(String label, String text, String scope, String caps)
   {
     this.caps = caps;
-    return EditTextSet(label, text, scope);
+    return editTextSet(label, text, scope);
   }
 
   /**
    * Identifies a button, based on an image label, and clicks on it.
    * @return
    */
-  public Boolean ImageButtonClick()
+  public Boolean imageButtonClick()
   {
     params.clear();
-    if (!AddMandatoryParameter("label", label))
+    if (!addMandatoryParameter("label", label))
       return false;
-    SetAdditionalParams();
+    setAdditionalParams();
 
-    return Helper.ExecuteMethod(driver, COMMAND_IMAGEBUTTONCLICK, params);	
+    return Helper.executeMethod(driver, COMMAND_IMAGE_BUTTON_CLICK, params);	
   }
 
   /**
    * Identifies a button, based on a text label, and clicks on it.
    * @return
    */
-  public Boolean TextButtonClick()
+  public Boolean textButtonClick()
   {
     params.clear();
-    if (!AddMandatoryParameter("label", label))
+    if (!addMandatoryParameter("label", label))
       return false;
-    SetAdditionalParams();
+    setAdditionalParams();
 
-    return Helper.ExecuteMethod(driver, COMMAND_BUTTONTEXTCLICK, params);	
+    return Helper.executeMethod(driver, COMMAND_BUTTON_TEXT_CLICK, params);	
   }
 
   /**
@@ -355,10 +449,10 @@ public class VisualAnalysis {
    * @param label
    * @return
    */
-  public Boolean TextButtonClick(String label)
+  public Boolean textButtonClick(String label)
   {
     this.label = label;
-    return TextButtonClick();
+    return textButtonClick();
   }
 
   /**
@@ -367,10 +461,10 @@ public class VisualAnalysis {
    * @param treshold
    * @return
    */
-  public Boolean ButtonTextClick(String label, int treshold)
+  public Boolean textButtonClick(String label, int treshold)
   {
     this.treshold = treshold;
-    return TextButtonClick(label);
+    return textButtonClick(label);
   }
 
   /**
@@ -379,24 +473,24 @@ public class VisualAnalysis {
    * @param scroll
    * @return
    */
-  public Boolean ButtonTextClick(String label, Boolean scroll)
+  public Boolean textButtonClick(String label, Boolean scroll)
   {
     this.scroll = scroll;
-    return TextButtonClick(label);
+    return textButtonClick(label);
   }
 
   /**
    * Finds an image (needle) on the device screen (haystack) and clicks on it.
    * @return
    */
-  public Boolean SelectImage()
+  public Boolean selectImage()
   {
     params.clear();
-    if (!AddMandatoryParameter("content", content))
+    if (!addMandatoryParameter("content", content))
       return false;
-    SetAdditionalParams();
+    setAdditionalParams();
 
-    return Helper.ExecuteMethod(driver, COMMAND_IMAGESELECT, params);	
+    return Helper.executeMethod(driver, COMMAND_IMAGE_SELECT, params);	
   }
 
   /**
@@ -404,24 +498,24 @@ public class VisualAnalysis {
    * @param content
    * @return
    */
-  public Boolean SelectImage(String content)
+  public Boolean selectImage(String content)
   {
     this.content = content;
-    return SelectImage();
+    return selectImage();
   }
 
   /**
    * Finds text (needle) on the device screen (haystack) and clicks on it.
    * @return true if the function is executed successfully. 
    */
-  public Boolean SelectText()
+  public Boolean selectText()
   {
     params.clear();
-    if (!AddMandatoryParameter("content", content))
+    if (!addMandatoryParameter("content", content))
       return false;
-    SetAdditionalParams();
+    setAdditionalParams();
 
-    return Helper.ExecuteMethod(driver, COMMAND_TEXTSELECT, params);	
+    return Helper.executeMethod(driver, COMMAND_TEXT_SELECT, params);	
   }
 
   /**
@@ -429,32 +523,32 @@ public class VisualAnalysis {
    * @param content - the text on the screen to click on
    * @return true if the function is executed successfully. 
    */
-  public Boolean SelectText(String content)
+  public Boolean selectText(String content)
   {
     this.content = content;
-    return SelectText();
+    return selectText();
   }
 
 
-  public Boolean SelectText(String content, String context)
+  public Boolean selectText(String content, String context)
   {
-    if (context != null && context.trim().length() > 0 && (Arrays.asList(VisualAnalysisParameters.CONTEXTS).contains(context)))
-      this.context = context;
-    return SelectText(content);
+    this.context = context;
+    this.content = content;
+    return selectText();
   }
 
   /**
    * Verifies that the given image appears on the device screen. In the case of failure, the script will be marked as failed.
    * @return
    */
-  public Boolean ImageCheckPoint()
+  public Boolean imageCheckPoint()
   {	
     params.clear();
-    if (!AddMandatoryParameter("content", content))
+    if (!addMandatoryParameter("content", content))
       return false;		
-    SetAdditionalParams();
+    setAdditionalParams();
 
-    return Helper.ExecuteMethod(driver, COMMAND_CHECKPOINTIMAGE, params);
+    return Helper.executeMethod(driver, COMMAND_CHECKPOINT_IMAGE, params);
   }
 
   /**
@@ -462,24 +556,24 @@ public class VisualAnalysis {
    * @param content
    * @return
    */
-  public Boolean ImageCheckPoint(String content)
+  public Boolean imageCheckPoint(String content)
   {
     this.content = content;
-    return ImageCheckPoint();
+    return imageCheckPoint();
   }
 
   /**
    * Verifies that the given text appears on the device screen. In the case of failure, the script will be marked as failed.
    * @return
    */
-  public Boolean TextCheckPoint() 
+  public Boolean textCheckPoint() 
   {
     params.clear();
-    if (!AddMandatoryParameter("content", content))
+    if (!addMandatoryParameter("content", content))
       return false;
-    SetAdditionalParams();
+    setAdditionalParams();
 
-    return Helper.ExecuteMethod(driver, COMMAND_CHECKPOINTTEXT, params);
+    return Helper.executeMethod(driver, COMMAND_CHECKPOINT_TEXT, params);
   }
 
   /**
@@ -487,10 +581,10 @@ public class VisualAnalysis {
    * @param content
    * @return
    */
-  public Boolean TextCheckPoint(String content)
+  public Boolean textCheckPoint(String content)
   {
     this.content = content;
-    return TextCheckPoint();
+    return textCheckPoint();
   }
 
   /**
@@ -499,19 +593,20 @@ public class VisualAnalysis {
    * @param match
    * @return
    */
-  public Boolean TextCheckPoint(String content, String match)
+  public Boolean textCheckPoint(String content, String match)
   {
+    this.content = content;
     this.match = match;
-    return TextCheckPoint(content);
+    return textCheckPoint();
   }
 
   /**
    * Finds an image (needle) on the device screen (haystack), and stores the coordinates for future commands.
    * @return
    */
-  public Boolean FindImage()
+  public Boolean findImage()
   {
-    return Find(COMMAND_IMAGEFIND);	
+    return find(COMMAND_IMAGE_FIND);	
   }
 
   /**
@@ -519,10 +614,10 @@ public class VisualAnalysis {
    * @param content
    * @return
    */
-  public Boolean FindImage(String content)
+  public Boolean findImage(String content)
   {
     this.content = content;
-    return FindImage();		
+    return findImage();		
   }
 
   /**
@@ -531,40 +626,41 @@ public class VisualAnalysis {
    * @param context
    * @return
    */
-  public Boolean FindImage(String content, String context)
+  public Boolean findImage(String content, String context)
   {
     this.context = context;
-    return FindImage(content);		
+    this.content = content;
+    return findImage();		
   }
 
   /**
    * Finds text (needle) on the device screen (haystack), and stores the coordinates for future commands.
    * @return
    */
-  public Boolean FindText()
+  public Boolean findText()
   {
-    return Find(COMMAND_TEXTFIND);
+    return find(COMMAND_TEXT_FIND);
   }
 
-  private Boolean Find(String methodName)
+  private Boolean find(String methodName)
   {
     params.clear();
-    if (!AddMandatoryParameter("content", content))
+    if (!addMandatoryParameter("content", content))
       return false;
-    SetAdditionalParams();
+    setAdditionalParams();
 
-    return Helper.ExecuteMethod(driver, methodName, params);
+    return Helper.executeMethod(driver, methodName, params);
   }
 
   /**
    * Returns the text that appears on the screen of the device. It does not select the text.
    * @return
    */
-  public String ScreenText()
+  public String screenText()
   {
     params.clear();
-    SetAdditionalParams();		
-    return Helper.ExecuteMethodString(driver, COMMAND_SCREENTEXT, params);
+    setAdditionalParams();		
+    return Helper.executeMethodString(driver, COMMAND_SCREENTEXT, params);
   }
 
   /**
@@ -572,10 +668,10 @@ public class VisualAnalysis {
    * @param key
    * @return
    */
-  public String ScreenText(String key)
+  public String screenText(String key)
   {
     this.key = key;
-    return ScreenText();
+    return screenText();
   }
 
 
@@ -585,79 +681,57 @@ public class VisualAnalysis {
    * @param context
    * @return
    */
-  public String ScreenText(String key, String context)
+  public String screenText(String key, String context)
   {
     this.context = context;
-    return ScreenText(key);
+    return screenText(key);
   }
 
-  private Boolean AddMandatoryParameter(String parameterName, String parameterValue)
+  private Boolean addMandatoryParameter(String parameterName, String parameterValue)
   {
-    if (parameterValue == null || parameterValue.trim().length() == 0)
+    if (parameterValue == null || parameterValue.trim().isEmpty())
     {
-      System.out.println("ERROR! Missing mandatory parameter " + parameterName);
+      Logger.LogError("Missing mandatory parameter " + parameterName);
       return false;
     }
-
     params.put(parameterName, parameterValue);
-
     return true;
   }
 
+  private void setAdditionalParams() {
 
-  private void SetAdditionalParams() {
-
-    if (treshold != 80)
+    if (treshold != null)
       params.put("threshold", treshold);
 
-    if (ignoreCase)
-      params.put("ignorecase", "nocase");
+    if (ignoreCase != null)
+      params.put("ignorecase", ignoreCase ? "nocase" : "case");
 
-    if (index != 1)
+    if (index != null)
       params.put("index", index);
 
-    if (scroll)
-      params.put("scrolling", "scroll");
+    if (scroll != null)
+      params.put("scrolling", scroll ? "scroll" : "noscroll");
 
-    if (maxScroll != 5)
+    if (maxScroll != null)
       params.put("maxscroll", maxScroll);
 
-    if (words)
-      params.put("words", "words");
+    if (words != null)
+      params.put("words", words ? "words" : "substring");
 
-    if (ignoreSpace)
-      params.put("ignorespace", "nospace");
+    if (ignoreSpace != null)
+      params.put("ignorespace", ignoreSpace ? "nospace" : "space");
 
-    if (ignorePunct)
-      params.put("ignorepunct", "nopunct");
+    if (ignorePunct != null)
+      params.put("ignorepunct", ignorePunct ? "nopunct" : "punct");
 
-    if (source != VisualAnalysisParameters.SOURCE_AUTO) 
-    {
-      if (Arrays.asList(VisualAnalysisParameters.SOURCES).contains(source))
-        params.put("source", source);
-      else
-        System.out.println("WARNING! Unsupported source type '" + source + "'. Using default one 'auto'");
-    }
-
+    if (source != null) 
+      params.put("source", source);
+    
     if (analysis != null)
-    {
-      if (Arrays.asList(VisualAnalysisParameters.ANALYSIS_VALUES).contains(analysis))
-      {	
-        if (source == VisualAnalysisParameters.SOURCE_NATIVE)
-          System.out.println("WARNING! The 'analysis' parameter is irrelevant when using native screen source.");			
-        params.put("analysis", analysis);
-      }
-      else
-        System.out.println("WARNING! Unsupported analysis type '" + analysis + "'. Possible values are: " + String.join(", ", VisualAnalysisParameters.ANALYSIS_VALUES));
-    }
+      params.put("analysis", analysis);
 
     if (language != null)
-    {
-      if (Arrays.asList(VisualAnalysisParameters.LANGUAGES).contains(language))
-        params.put("language", language);
-      else
-        System.out.println("WARNING! Unsupported language '" + language + "'. Possible values are: " + String.join(", ", VisualAnalysisParameters.LANGUAGES));
-    }
+      params.put("language", language);
 
     if (screenTop != null)
       params.put("screen.top", screenTop);
@@ -675,93 +749,34 @@ public class VisualAnalysis {
       params.put("match", match);
 
     if (textMatch != null) {
-      if (Arrays.asList(VisualAnalysisParameters.TEXT_MATCHES).contains(textMatch))
-        params.put("match", textMatch);
-      else
-        System.out.println("WARNING! Unsupported match type '" + textMatch + "'. Possible values are: " + String.join(", ", VisualAnalysisParameters.TEXT_MATCHES));				
-    }
+      params.put("match", textMatch);
+     
+    if (inverse != null)	
+      params.put("inverse", inverse);
 
-    if (inverse != null)
-    {
-      if (Arrays.asList(VisualAnalysisParameters.INVERSE_VALUES).contains(inverse))
-      {
-        if (analysis != VisualAnalysisParameters.ANALYSIS_MANUAL)
-          System.out.println("You can use 'inverse' parameter only with 'analysis' set to manual. Currently 'analysis' is set to " + analysis);
-        else
-        {
-          if (source == VisualAnalysisParameters.SOURCE_NATIVE)
-            System.out.println("The inverse parameter is irrelevant when using 'native' screen source.");	
-          params.put("inverse", inverse);
-        }				
-      }
-      else
-        System.out.println("WARNING! Unsupported inverse type '" + match + "'. Possible values are: " + String.join(", ", VisualAnalysisParameters.INVERSE_VALUES));
-    }
-
-    if (imageBoundNeedleBound != 100)
+    if (imageBoundNeedleBound != null)
       params.put("imageBound.needleBound", imageBoundNeedleBound);
 
-    if (imageBoundHeystackArea != 786432)
-    {
-      if (imageBoundHeystackArea < 196608)
-        System.out.println("WARNING! imageBound.haystackBound value is less than the minimum possible 196608");
-
+    if (imageBoundHeystackArea != null)
       params.put("imageBound.haystackBound", imageBoundHeystackArea);
-    }
 
     if (policy != null)
-    {
-      if(Arrays.asList(VisualAnalysisParameters.POLICIES).contains(policy))
-      { 
-        if (source == VisualAnalysisParameters.SOURCE_NATIVE)
-          System.out.println("The policy parameter is irrelevant when using 'native' screen source.");
-        params.put("policy", policy);
-      }			
-      else
-      {
-        System.out.println("WARNING! Unsupported policy type '" + policy + "'. Possible values are: " + String.join(", ", VisualAnalysisParameters.POLICIES));			
-      }
-
-    }
+      params.put("policy", policy);
 
     if (operation != null)
-    {
-      if (Arrays.asList(VisualAnalysisParameters.OPERATIONS).contains(operation))
-        params.put("operation", operation);
-      else
-        System.out.println("WARNING! Unsupported operation type '" + operation + "'. Possible values are: " + String.join(", ", VisualAnalysisParameters.OPERATIONS));
-    }
+      params.put("operation", operation);
 
-    if (repeat != 1)
-    {
-      if (operation != "Single tap" && operation != "Double tap")
-        System.out.println("WARNING! 'repeat' parameter is relevant for Single tap and Double tap actions only ");				
+    if (repeat != null)		
       params.put("repeat", repeat);			
-    }
 
-    if (relationDirection != null)
-    {
-      if (Arrays.asList(VisualAnalysisParameters.RELATION_DIRECTIONS).contains(relationDirection))
-        params.put("relation.direction",  relationDirection);
-      else
-        System.out.println("WARNING! Unsupported operation type '" + relationDirection + "'. Possible values are: " + String.join(", ", VisualAnalysisParameters.RELATION_DIRECTIONS));		
-    }
+    if (relationDirection != null)	
+      params.put("relation.direction",  relationDirection);
 
     if (relationInline != null)
-    {
-      if (Arrays.asList(VisualAnalysisParameters.RELATION_INLINE_VALUES).contains(relationInline))
-        params.put("relation.inline",  relationInline);					
-      else
-        System.out.println("WARNING! Unsupported relation.inline value '" + relationInline + "'. Possible values are: " + String.join(", ", VisualAnalysisParameters.RELATION_INLINE_VALUES));
-    }
+      params.put("relation.inline",  relationInline);
 
     if (reportResolution != null)
-    {
-      if (Arrays.asList(VisualAnalysisParameters.REPORT_RESOLUTIONS).contains(reportResolution))
-        params.put("report.resolution", reportResolution);
-      else
-        System.out.println("WARNING! Unsupported report.resolution value '" + reportResolution + "'. Possible values are: " + String.join(", ", VisualAnalysisParameters.REPORT_RESOLUTIONS));
-    }
+      params.put("report.resolution", reportResolution);
 
     if (imageTop != null)
       params.put("image.top", imageTop);
@@ -776,13 +791,7 @@ public class VisualAnalysis {
       params.put("image.width", imageWidth);
 
     if (matchGeneric != null)
-    {
-      if (Arrays.asList(VisualAnalysisParameters.MATCH_GENERIC_VALUES).contains(matchGeneric))
-        params.put("matchGeneric", matchGeneric);
-      else
-        System.out.println("WARNING! Unsupported matchGeneric value '" + matchGeneric + "'. Possible values are: " + String.join(", ", VisualAnalysisParameters.MATCH_GENERIC_VALUES));
-
-    }
+      params.put("matchGeneric", matchGeneric);
 
     if (grid != null)
       params.put("grid", grid);
@@ -790,36 +799,21 @@ public class VisualAnalysis {
     if (ocr != null)
       params.put("ocr", ocr);
 
-    if (profile != null) {
-      if (Arrays.asList(VisualAnalysisParameters.PROFILES).contains(profile))
-        params.put("profile", profile);
-      else
-        System.out.println("WARNING! Unsupported profile value '" + profile + "'. Possible values are: " + String.join(", ", VisualAnalysisParameters.PROFILES));
-    }
-
+    if (profile != null) 
+      params.put("profile", profile);
+    
     if (shift != null)
-    {
-      if (Arrays.asList(VisualAnalysisParameters.SHIFT_VALUES).contains(shift))
-        params.put("shift", shift);
-      else
-        System.out.println("WARNING! Unsupported shift value '" + shift + "'. Possible values are: " + String.join(", ", VisualAnalysisParameters.SHIFT_VALUES));	
-    }
+      params.put("shift", shift);
 
     if (offset != null)
       params.put("offset", offset);
 
     if (xAlignment != null)
-      if (Arrays.asList(VisualAnalysisParameters.ALIGNMENTS).contains(xAlignment))
-        params.put("x.alignment", xAlignment);
-      else
-        System.out.println("WARNING! Unsupported shift value '" + xAlignment + "'. Possible values are: " + String.join(", ", VisualAnalysisParameters.ALIGNMENTS));		
-
+      params.put("x.alignment", xAlignment);
+    
     if (yAlignment != null)
-      if (Arrays.asList(VisualAnalysisParameters.ALIGNMENTS).contains(xAlignment))
-        params.put("y.alignment", yAlignment);
-      else
-        System.out.println("WARNING! Unsupported yAlignment value '" + yAlignment + "'. Possible values are: " + String.join(", ", VisualAnalysisParameters.ALIGNMENTS));
-
+      params.put("y.alignment", yAlignment);
+    
     if (xWidth != null)
       params.put("x.width", xWidth);
 
@@ -827,49 +821,31 @@ public class VisualAnalysis {
       params.put("y.height", yHeight);
 
     if (context != null)
-      if (Arrays.asList(VisualAnalysisParameters.CONTEXTS).contains(context))
-        params.put("context", context);
-      else
-        System.out.println("WARNING! Unsupported context value '" + context + "'. Possible values are: " + String.join(", ", VisualAnalysisParameters.CONTEXTS));
-
+      params.put("context", context);
+    
     if (scope != null)
-      if(Arrays.asList(VisualAnalysisParameters.SCOPES).contains(scope))
-        params.put("scope", this.scope);
-      else
-        System.out.println("WARNING! Unsupported scope value: " + scope + ". Possible values are: " + String.join(", ", VisualAnalysisParameters.SCOPES));
-
-
+      params.put("scope", this.scope);
+    
     if (caps != null)
-      if (Arrays.asList(VisualAnalysisParameters.CAPS_VALUES).contains(caps))
-        params.put("caps", caps);
-      else
-        System.out.println("WARNING! Unsupported caps value: " + caps + "Possible values are: " + String.join(", ", VisualAnalysisParameters.CAPS_VALUES));		
-
-
+      params.put("caps", caps);
+    
     if (labelDirection != null)
-      if (Arrays.asList(VisualAnalysisParameters.LABEL_DIRECTIONS).contains(labelDirection))
-        params.put("label.direction",  labelDirection);
-      else
-        System.out.println("WARNING! Unsupported label.direction value: " + labelDirection + ". Possible values are: " + String.join(", ", VisualAnalysisParameters.LABEL_DIRECTIONS));
-
+      params.put("label.direction",  labelDirection);
+    
     if (labelOffset != null)
       params.put("label.offset",  labelOffset);
 
-    if (timeout > -1)
+    if (timeout != null)
       params.put("timeout", timeout);
 
-    if (lines > -1)
+    if (lines != null)
       params.put("lines", lines);
 
-    if (interval > 0)
+    if (interval != null)
       params.put("interval", interval);
 
     if (measurement != null)
-      if(Arrays.asList(VisualAnalysisParameters.MEASUREMENTS).contains(measurement))
-        params.put("measurement",  measurement);
-      else
-        System.out.println("WARNING! Unsupported measurement value: " + measurement + ". Possible values are: " + String.join(", ", VisualAnalysisParameters.MEASUREMENTS));
-
-
+      params.put("measurement",  measurement);
+    }
   }
 }

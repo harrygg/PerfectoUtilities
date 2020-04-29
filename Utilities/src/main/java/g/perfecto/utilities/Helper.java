@@ -9,15 +9,15 @@ public class Helper {
 
   public static int logLevel = 2;
 
-  public static Boolean ExecuteMethod(RemoteWebDriver driver, String methodName, Map<String, Object> params)
+  public static Boolean executeMethod(RemoteWebDriver driver, String methodName, Map<String, Object> params)
   {
-    String res = ExecuteMethodString(driver, methodName, params);
+    String res = executeMethodString(driver, methodName, params);
     if (res == null || res.equalsIgnoreCase("false") || res.equalsIgnoreCase("failed"))
       return false;
     return true;
   }
 
-  public static String ExecuteMethodString(RemoteWebDriver driver, String methodName, Map<String, Object> params)
+  public static String executeMethodString(RemoteWebDriver driver, String methodName, Map<String, Object> params)
   {
     try {
       if (logLevel > 0)
@@ -46,9 +46,4 @@ public class Helper {
     }
   }
 
-  public static void Wait(Integer seconds) throws InterruptedException
-  {
-    Logger.LogInfo("Waiting for " + seconds + " seconds");
-    Thread.sleep(seconds * 1000);
-  }
 }

@@ -3,7 +3,22 @@
   <groupId>g.perfecto</groupId>
   <artifactId>utilities</artifactId>
   <version>0.0.1-SNAPSHOT</version>
+  
+  
+	<properties>
+     <reportium-sdk.version>2.3.1</reportium-sdk.version>
+	</properties>
+
+  <repositories>
+    <repository>
+        <id>perfectomobile</id>
+        <name>Perfecto mobile</name>
+        <url>https://repo1.perfectomobile.com/public/repositories/maven</url>
+    </repository>
+  </repositories>
   <dependencies>
+
+    
   	<dependency>
   		<groupId>org.seleniumhq.selenium</groupId>
   		<artifactId>selenium-api</artifactId>
@@ -25,7 +40,44 @@
         <artifactId>json</artifactId>
         <version>20190722</version>
     </dependency>
+    
+    <dependency>
+        <groupId>com.perfecto.reporting-sdk</groupId>
+        <artifactId>reportium-java</artifactId>
+        <version>${reportium-sdk.version}</version>
+        <exclusions>
+          <exclusion>
+             <groupId>org.seleniumhq.selenium</groupId>
+             <artifactId>selenium-api</artifactId>
+          </exclusion>
+        </exclusions>
+    </dependency>
+    <dependency>
+	    <groupId>io.appium</groupId>
+	    <artifactId>java-client</artifactId>
+	    <version>7.3.0</version>
+		</dependency>
+		
+		<dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-access</artifactId>
+      <version>1.2.3</version>
+    </dependency>
+		<!-- https://mvnrepository.com/artifact/ch.qos.logback/classic -->
+		<dependency>
+		    <groupId>ch.qos.logback</groupId>
+		    <artifactId>classic</artifactId>
+		    <version>1.0.0</version>
+		</dependency>
+
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-core</artifactId>
+      <version>1.2.3</version>
+    </dependency>
   </dependencies>
+  
+  
 	<!-- maven-compiler-plugin -->
     <build>
         <plugins>

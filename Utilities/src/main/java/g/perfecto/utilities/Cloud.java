@@ -8,11 +8,13 @@ public class Cloud
 {
   private RemoteWebDriver driver = null;
 
-  private final String COMMAND_GATEWAYCALL = "mobile:gateway:call";
-  private final String COMMAND_GATEWAYEMAIL = "mobile:gateway:email";
-  private final String COMMAND_GATEWAYSMS = "mobile:gateway:sms";
+  public final static String COMMAND_GATEWAY_CALL = "mobile:gateway:call";
+  public final static String COMMAND_GATEWAY_EMAIL = "mobile:gateway:email";
+  public final static String COMMAND_GATEWAY_SMS = "mobile:gateway:sms";
 
-  public Cloud(RemoteWebDriver driver) {
+  public Cloud(RemoteWebDriver driver) 
+  {
+    Logger.LogDebug("Creating Cloud object");
     this.driver = driver;
   }
 
@@ -25,7 +27,7 @@ public class Cloud
   {
     Map<String, Object> params = new HashMap<>();
     params.put("to.device", deviceId);
-    return Helper.ExecuteMethod(driver, COMMAND_GATEWAYCALL, params);
+    return Helper.executeMethod(driver, COMMAND_GATEWAY_CALL, params);
   }
 
   /**
@@ -38,7 +40,7 @@ public class Cloud
   {
     Map<String, Object> params = new HashMap<>();
     params.put("to.number", number);
-    return Helper.ExecuteMethod(driver, COMMAND_GATEWAYCALL, params);
+    return Helper.executeMethod(driver, COMMAND_GATEWAY_CALL, params);
   }
 
   /**
@@ -49,22 +51,22 @@ public class Cloud
   {
     Map<String, Object> params = new HashMap<>();
     params.put("to.user", "user");
-    return Helper.ExecuteMethod(driver, COMMAND_GATEWAYCALL, params);
+    return Helper.executeMethod(driver, COMMAND_GATEWAY_CALL, params);
   }
 
   /**
    * Generates an external voice call recording to the selected destination
    * @param user The destination user. It is possible to select multiple users. 
-		The user identifier is the Perfecto Mobile username.
-		The user must be registered with the correct mobile number.
-		The business number field does not apply.
+     The user identifier is the Perfecto Mobile username.
+     The user must be registered with the correct mobile number.
+     The business number field does not apply.
    * @return
    */
   public Boolean CallUser(String user)
   {
     Map<String, Object> params = new HashMap<>();
     params.put("to.user", user);
-    return Helper.ExecuteMethod(driver, COMMAND_GATEWAYCALL, params);
+    return Helper.executeMethod(driver, COMMAND_GATEWAY_CALL, params);
   }
 
   /**
@@ -78,7 +80,7 @@ public class Cloud
     Map<String, Object> params = new HashMap<>();
     params.put("to.handset", deviceId);
     params.put("body", content);
-    return Helper.ExecuteMethod(driver, COMMAND_GATEWAYSMS, params);
+    return Helper.executeMethod(driver, COMMAND_GATEWAY_SMS, params);
   }
 
   /**
@@ -95,7 +97,7 @@ public class Cloud
     Map<String, Object> params = new HashMap<>();
     params.put("to.handset", user);
     params.put("body", content);
-    return Helper.ExecuteMethod(driver, COMMAND_GATEWAYSMS, params);
+    return Helper.executeMethod(driver, COMMAND_GATEWAY_SMS, params);
   }
 
   /**
@@ -107,7 +109,7 @@ public class Cloud
   {
     Map<String, Object> params = new HashMap<>();
     params.put("body", content);
-    return Helper.ExecuteMethod(driver, COMMAND_GATEWAYSMS, params);
+    return Helper.executeMethod(driver, COMMAND_GATEWAY_SMS, params);
   }
 
   /**
@@ -122,7 +124,7 @@ public class Cloud
     Map<String, Object> params = new HashMap<>();
     params.put("to.handset", number);
     params.put("body", content);
-    return Helper.ExecuteMethod(driver, COMMAND_GATEWAYSMS, params);
+    return Helper.executeMethod(driver, COMMAND_GATEWAY_SMS, params);
   }
 
   /**
@@ -140,7 +142,7 @@ public class Cloud
       params.put("body", body);
     if (subject != null)
       params.put("subject", subject);
-    return Helper.ExecuteMethod(driver, COMMAND_GATEWAYEMAIL, params);
+    return Helper.executeMethod(driver, COMMAND_GATEWAY_EMAIL, params);
   }
 
   /**
@@ -174,12 +176,16 @@ public class Cloud
   public Boolean SendEmailToDevice(String deviceId, String body, String subject)
   {
     Map<String, Object> params = new HashMap<>();
+    
     params.put("to.handset", deviceId);
+    
     if (body != null)
       params.put("body", body);
+    
     if (subject != null)
       params.put("subject", subject);
-    return Helper.ExecuteMethod(driver, COMMAND_GATEWAYEMAIL, params);
+    
+    return Helper.executeMethod(driver, COMMAND_GATEWAY_EMAIL, params);
   }
 
   /**
@@ -214,12 +220,16 @@ public class Cloud
   public Boolean SendEmailToUser(String userEmail, String body, String subject)
   {
     Map<String, Object> params = new HashMap<>();
+    
     params.put("to.user", userEmail);
+    
     if (body != null)
       params.put("body", body);
+    
     if (subject != null)
       params.put("subject", subject);
-    return Helper.ExecuteMethod(driver, COMMAND_GATEWAYEMAIL, params);
+    
+    return Helper.executeMethod(driver, COMMAND_GATEWAY_EMAIL, params);
   }
 
 
@@ -244,12 +254,16 @@ public class Cloud
   public Boolean SendEmailToCurrentUser(String body, String subject)
   {
     Map<String, Object> params = new HashMap<>();
+    
     params.put("to.logical", "user");
+    
     if (body != null)
       params.put("body", body);
+    
     if (subject != null)
       params.put("subject", subject);
-    return Helper.ExecuteMethod(driver, COMMAND_GATEWAYEMAIL, params);
+    
+    return Helper.executeMethod(driver, COMMAND_GATEWAY_EMAIL, params);
   }
 
   /**

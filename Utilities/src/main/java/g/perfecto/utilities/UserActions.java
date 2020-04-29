@@ -8,6 +8,7 @@ import org.apache.commons.exec.ExecuteStreamHandler;
 import org.openqa.selenium.By;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -16,7 +17,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class UserActions {
 
-  private RemoteWebDriver driver = null;
+  private RemoteWebDriver driver;
 
   private final String COMMAND_DRAG = "mobile:touch:drag";
   private final String COMMAND_SWIPE = "mobile:touch:swipe";
@@ -24,7 +25,8 @@ public class UserActions {
   private final String COMMAND_PRESSKEY = "mobile:presskey";
   private final String COMMAND_SENDKEY = "mobile:key:event";
 
-  public UserActions(RemoteWebDriver driver) {
+  public UserActions(RemoteWebDriver driver) 
+  {
     Logger.LogDebug("Creating UserActions object");
     this.driver = driver;
   }	
@@ -36,7 +38,8 @@ public class UserActions {
    * @param auxiliary: tap | notap | down | up
    * @return
    */
-  public Boolean Drag(String location, int duration, String auxiliary) {
+  public Boolean drag(String location, int duration, String auxiliary) 
+  {
 
     Map<String, Object> params = new HashMap<>();
 
@@ -53,23 +56,25 @@ public class UserActions {
     if (auxiliary != null && auxiliary.trim().length() > 0)
       params.put("auxiliary", auxiliary);
 
-    return Helper.ExecuteMethod(driver, COMMAND_DRAG, params);
+    return Helper.executeMethod(driver, COMMAND_DRAG, params);
   }
 
 
-  public Boolean Drag(String location, int duration){
-    return Drag(location, duration, null);
-  }
-
-
-  public Boolean Drag(String location){
-    return Drag(location, 1, null);
-  }
-
-
-  public Boolean Swipe(String start, String end)
+  public Boolean drag(String location, int duration)
   {
-    return Swipe(start, end, 3);
+    return drag(location, duration, null);
+  }
+
+
+  public Boolean drag(String location)
+  {
+    return drag(location, 1, null);
+  }
+
+
+  public Boolean swipe(String start, String end)
+  {
+    return swipe(start, end, 3);
   }
 
   /**
@@ -80,7 +85,7 @@ public class UserActions {
    * @param duration: 1-30
    * @return
    */
-  public Boolean Swipe(String start, String end, int duration)
+  public Boolean swipe(String start, String end, int duration)
   {
     Map<String, Object> params = new HashMap<>();
 
@@ -97,37 +102,37 @@ public class UserActions {
     params.put("end", end);
     params.put("duration", duration);
 
-    return Helper.ExecuteMethod(driver, COMMAND_SWIPE, params);
+    return Helper.executeMethod(driver, COMMAND_SWIPE, params);
   }
 
   public Boolean SwipeUp(){
-    return Swipe("65%,50%", "45%,50%");
+    return swipe("65%,50%", "45%,50%");
   }
 
   public Boolean SwipeUp(int duration){
-    return Swipe("65%,50%", "45%,50%", duration);
+    return swipe("65%,50%", "45%,50%", duration);
   }
 
   public Boolean SwipeDown(){
-    return Swipe("45%,50%", "65%,50%");
+    return swipe("45%,50%", "65%,50%");
   }
 
   public Boolean SwipeDown(int duration){
-    return Swipe("45%,50%", "65%,50%", duration);
+    return swipe("45%,50%", "65%,50%", duration);
   }
 
   public Boolean SwipeLeft(){
-    return Swipe("50%,65%", "50%,45%");
+    return swipe("50%,65%", "50%,45%");
   }
   public Boolean SwipeLeft(int duration){
-    return Swipe("50%,65%", "50%,45%", duration);
+    return swipe("50%,65%", "50%,45%", duration);
   }
 
   public Boolean SwipeRight(){
-    return Swipe("50%,45%", "50%,65%");
+    return swipe("50%,45%", "50%,65%");
   }
   public Boolean SwipeRight(int duration){
-    return Swipe("50%,45%", "50%,65%", duration);
+    return swipe("50%,45%", "50%,65%", duration);
   }
 
   /**
@@ -138,7 +143,7 @@ public class UserActions {
    * @param duration 1-30
    * @return
    */
-  public Boolean Tap(String location, int duration ) {
+  public Boolean tap(String location, int duration ) {
 
     Map<String, Object> params = new HashMap<>();
 
@@ -152,31 +157,42 @@ public class UserActions {
     if (duration > 0)
       params.put("duration", duration);
 
-    return Helper.ExecuteMethod(driver, COMMAND_TAP, params);
+    return Helper.executeMethod(driver, COMMAND_TAP, params);
   }
 
-  public Boolean Tap(String location) {
-    return Tap(location, 0);
+  public Boolean tap(String location) 
+  {
+    return tap(location, 0);
   }	
 
-  public Boolean Tap() {
-    return Tap("50%,50%");
+  public Boolean tap() 
+  {
+    return tap("50%,50%");
   }
 
-  public Boolean TapTopLeft() {
-    return Tap("1%,1%");
+  public Boolean tapTopLeft() 
+  {
+    return tap("1%,1%");
   }
 
-  public Boolean TapTopRight() {
-    return Tap("99%,1%");
+  public Boolean tapTopRight() 
+  {
+    return tap("99%,1%");
   }
 
-  public Boolean TapBottomLeft() {
-    return Tap("1%,99%");
+  public Boolean tapBottomLeft() 
+  {
+    return tap("1%,99%");
   }
 
-  public Boolean TapBottomRight() {
-    return Tap("99%,99%");
+  public Boolean tapBottomRight() 
+  {
+    return tap("99%,99%");
+  }
+  
+  public Boolean tapBottom()
+  {
+    return tap("50%,95%");
   }
 
   /**
@@ -184,9 +200,9 @@ public class UserActions {
    * @param key The physical device keys to press. It is possible to select a sequence of comma separated keys.
    * @return
    */
-  public Boolean PressKey(String key)
+  public Boolean pressKey(String key)
   {
-    return PressKey(key, null);
+    return pressKey(key, null);
   }
 
   /**
@@ -195,7 +211,7 @@ public class UserActions {
    * @param keypad Specify the logical name of the virtual keypad to be used. 
    * @return
    */
-  public Boolean PressKey(String key, String keypad)
+  public Boolean pressKey(String key, String keypad)
   {
     if (key == null || key.trim().length() == 0)
     {
@@ -209,7 +225,7 @@ public class UserActions {
     if (keypad != null && keypad.trim().length() > 0)
       params.put("keypad", keypad);
 
-    return Helper.ExecuteMethod(driver, COMMAND_PRESSKEY, params);
+    return Helper.executeMethod(driver, COMMAND_PRESSKEY, params);
   }
 
   /**
@@ -218,7 +234,7 @@ public class UserActions {
    * @param metastate The metastate key event to send to the device.
    * @return
    */
-  public Boolean SendKeyEvent(Integer keyEvent, Integer metastate)
+  public Boolean sendKeyEvent(Integer keyEvent, Integer metastate)
   {	
     Map<String, Object> params = new HashMap<>();
     params.put("key", keyEvent);
@@ -226,7 +242,7 @@ public class UserActions {
     if (metastate != null)
       params.put("metastate", metastate );
 
-    return Helper.ExecuteMethod(driver, COMMAND_SENDKEY, params);
+    return Helper.executeMethod(driver, COMMAND_SENDKEY, params);
   }
 
   /**
@@ -236,139 +252,223 @@ public class UserActions {
    */
   public Boolean SendKeyEvent(Integer keyEvent)
   {
-    return SendKeyEvent(keyEvent, null);
+    return sendKeyEvent(keyEvent, null);
   }
 
   /**
    * Wrapper of WebElement.Click method with additional logging
    * @param element
    */
-  public void Click(WebElement element)
+  public void clickOn(WebElement element)
   {
     Logger.LogInfo("------------------------------------------------");
     Logger.LogInfo("Clicking on element " + element.toString());
     element.click();
   }
-
-  public void Click(String xpath)
+  
+  public void clickOn(By by)
   {
-    Click(By.xpath(xpath));
+    clickOn(driver.findElement(by));
+  }
+  
+  public void clickOn(String xpath)
+  {
+    clickOn(driver.findElement(By.xpath(xpath)));
   }
 
-  public void ClickOnId(String id)
+  public void ClickOnXpath(String xpath) {
+    clickOn(xpath);
+  }
+  
+  public void clickOnId(String id)
   {
-    Click(By.id(id));
+    clickOn(driver.findElement(By.id(id)));
   }
 
-  public void ClickOnLabel(String label)
+  public void clickOnLabel(String label)
   {
-    Click(By.xpath("//*[@label='" + label + "']"));
+    clickOn(driver.findElement(By.xpath("//*[@label=\"" + label + "\"]")));
   }
 
-  public void ClickOnValue(String value)
+  public void clickOnValue(String value)
   {
-    Click(By.xpath("//*[@value='" + value + "']"));
+    clickOn(driver.findElement(By.xpath("//*[@value=\"" + value + "\"]")));
   }
 
-  public void ClickOnText(String text)
+  public void clickOnText(String text)
   {
-    Click(By.xpath("//*[@value='" + text + "'] | //*[@label='" + text + "']"));
+    clickOn(driver.findElement(By.xpath("//*[@value=\"" + text + "\"] | //*[@label=\"" + text + "\"]")));
   }
 
-  public void Click(By by)
-  {
-    Click(driver.findElement(by));
+  public void clickOnName(String name) {
+    clickOn(driver.findElement(By.xpath("//*[@name='" + name + "']")));
   }
+ 
 
-  public void TryClick(String xpath)
-  {
-    TryClick(By.xpath(xpath));
-  }
-
-  public void TryClickOnId(String id)
-  {
-    TryClick(By.id(id));
-  }
-
-  public void TryClickOnLabel(String label)
-  {
-    TryClick(By.xpath("//*[@label='" + label + "']"));
-  }
-
-  public void TryClickOnValue(String value)
-  {
-    TryClick(By.xpath("//*[@value='" + value + "']"));
-  }
-
-  public void TryClickOnText(String text)
-  {
-    TryClick(By.xpath("//*[@label='" + text + "'] | //*[@value='" + text + "']"));
-  }
-
-  public void TryClick(By by)
-  {
-    TryClick(driver.findElement(by));
-  }
-
-  public void TryClick(WebElement element)
+  public void tryClick(WebElement element)
   {
     try {
-      Click(element);
+      clickOn(element);
     } catch (Exception e) {
       e.printStackTrace();
     }
   }
 
-  public void Type(String text, WebElement el)
+  public void tryClick(By by)
   {
+    try {
+      Logger.LogInfo("------------------------------------------------");
+      Logger.LogInfo("Clicking on element " + by);
+      driver.findElement(by).click();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  
+  public void tryClick(String xpath)
+  {
+    tryClick(By.xpath(xpath));
+  }
+
+  public void tryClickOnId(String id)
+  {
+    tryClick(By.id(id));
+  }
+
+  public void tryClickOnLabel(String label)
+  {
+    tryClick(By.xpath("//*[@label='" + label + "']"));
+  }
+
+  public void tryClickOnValue(String value)
+  {
+    tryClick(By.xpath("//*[@value='" + value + "']"));
+  }
+
+  public void tryClickOnText(String text)
+  {
+    tryClick(By.xpath("//*[@label='" + text + "'] | //*[@value='" + text + "']"));
+  }
+  
+  public void type(String text, WebElement el, Boolean clear)
+  {
+    if (clear == true)
+    {
+      Logger.LogInfo("Clearing text from element " + el);
+      el.clear();
+    }
+    
     Logger.LogInfo("Typing text " + text + " in element " + el);
     el.sendKeys(text);
   }
-
-  public void Type(String text, By by)
+  
+  public void type(String text, WebElement el)
   {
-    Type(text, driver.findElement(by));
+    type(text, el, false);
   }
 
-  public void Type(String text, String xpath)
+  public void type(String text, By by, Boolean clear)
   {
-    Type(text, driver.findElement(By.xpath(xpath)));
+    type(text, driver.findElement(by), clear);
   }
 
-  public void TryType(String text, String xpath)
+  public void type(String text, By by)
+  {
+    type(text, driver.findElement(by));
+  }
+  
+  public void type(String text, String xpath, Boolean clear)
+  {
+    type(text, driver.findElement(By.xpath(xpath)), clear);
+  }  
+  
+  public void type(String text, String xpath)
+  {
+    type(text, driver.findElement(By.xpath(xpath)));
+  }
+
+  public void tryType(String text, String xpath, Boolean clear)
   {
     try {
-      Type(text, driver.findElement(By.xpath(xpath)));
+      type(text, driver.findElement(By.xpath(xpath)), clear);
     } catch (Exception e) {
       e.printStackTrace();
     }
   }
 
-  public void TryType(String text, WebElement el)
+  public void tryType(String text, String xpath)
   {
-    Type(text, el);
+    try {
+      type(text, driver.findElement(By.xpath(xpath)));
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
-  public void TryType(String text, By by)
+  public void tryType(String text, WebElement el, Boolean clear)
   {
-    Type(text, driver.findElement(by));
+    try {
+      type(text, el, clear);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+  
+  public void tryType(String text, WebElement el)
+  {
+    try {
+      type(text, el, false);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+  
+  public void tryType(String text, By by, Boolean clear)
+  {
+    type(text, driver.findElement(by), clear);
   }
 
-  public String TakeScreenshot()
+  public void tryType(String text, By by)
+  {
+    type(text, driver.findElement(by));
+  }
+  
+  public String takeScreenshot()
   {
     Logger.LogInfo("Taking screenshot as base64");
     return driver.getScreenshotAs(OutputType.BASE64);
   }
-
-  public File TakeScreenshotAsFile()
+  
+  public String takeScreenshotAsBase64()
+  {
+    Logger.LogInfo("Taking screenshot as base64");
+    return driver.getScreenshotAs(OutputType.BASE64);
+  }
+  
+  public String tryTakeScreenshot()
+  {
+    try {
+      return takeScreenshot();
+    } catch (WebDriverException e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
+  
+  public File takeScreenshotAsFile()
   {
     Logger.LogInfo("Taking screenshot as file");
     return driver.getScreenshotAs(OutputType.FILE);
   }
 
-  public byte[] TakeScreenshotAsBytes()
+  public byte[] takeScreenshotAsBytes()
   {
     Logger.LogInfo("Taking screenshot as file");
     return driver.getScreenshotAs(OutputType.BYTES);
+  }
+
+  public void clickOnCoordinates(String string) {
+    tap(string);    
   }
 }

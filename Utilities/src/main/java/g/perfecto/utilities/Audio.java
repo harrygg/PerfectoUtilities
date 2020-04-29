@@ -38,17 +38,18 @@ public class Audio
 	private Map<String, Object> params = new HashMap<>();
 	private RemoteWebDriver driver;
 	
-	private final String COMMAND_INJECT_AUDIO = "mobile:audio:inject";
-	private final String COMMAND_AUDIORECORDINGSTART = "mobile:audio.recording:start";
-	private final String COMMAND_AUDIORECORDINGSTOP = "mobile:audio.recording:stop";
-	private final String COMMAND_TEXTTOAUDIO = "mobile:text:audio";
-	private final String COMMAND_VOICEASSIST = "mobile:voice:assist";
-	private final String COMMAND_AUDIOVALIDATION = "mobile:audio:validation";
-	private final String COMMAND_AUDIOTEXTVALIDATION = "mobile:audio-text:validation";
-	private final String COMMAND_AUDIOTOTEXT = "mobile:audio:text";
+	private static final String COMMAND_INJECT_AUDIO = "mobile:audio:inject";
+	private static final String COMMAND_AUDIO_RECORDING_START = "mobile:audio.recording:start";
+	private static final String COMMAND_AUDIO_RECORDING_STOP = "mobile:audio.recording:stop";
+	private static final String COMMAND_TEXTTO_AUDIO = "mobile:text:audio";
+	private static final String COMMAND_VOICE_ASSIST = "mobile:voice:assist";
+	private static final String COMMAND_AUDIO_VALIDATION = "mobile:audio:validation";
+	private static final String COMMAND_AUDIO_TEXT_VALIDATION = "mobile:audio-text:validation";
+	private static final String COMMAND_AUDIO_TO_TEXT = "mobile:audio:text";
 	
 	public Audio(RemoteWebDriver driver)
 	{
+	  Logger.LogDebug("Creating Audio object");
 		this.driver = driver;
 	}
 	
@@ -57,18 +58,18 @@ public class Audio
 	 * Command starts recording the audio output from the device and creates a WAV file. The file is saved in the media storage server. 
 	 * @return A URL to the file location is returned in the response to the command
 	 */
-	public String StartRecording()
+	public String startRecording()
 	{
-		return Helper.ExecuteMethodString(driver, COMMAND_AUDIORECORDINGSTART, new HashMap<String, Object>(){});
+		return Helper.executeMethodString(driver, COMMAND_AUDIO_RECORDING_START, new HashMap<String, Object>());
 	}
 
 	/**
 	 * Command stops recording the audio output from the device, closes the file, and stores in the media storage server at the URL declared at the start of audio recording.
 	 * @return
 	 */
-	public String StopRecording()
+	public String stopRecording()
 	{
-		return Helper.ExecuteMethodString(driver, COMMAND_AUDIORECORDINGSTOP, new HashMap<String, Object>(){});
+		return Helper.executeMethodString(driver, COMMAND_AUDIO_RECORDING_STOP, new HashMap<String, Object>());
 	}
 	
 	/**
@@ -77,11 +78,11 @@ public class Audio
 	 * @param wait The execution mode. No wait (default) - continue to the next line in the script immediately
 	 * @return
 	 */
-	public Boolean Inject(String key, Boolean wait)
+	public Boolean inject(String key, Boolean wait)
 	{
 		repositoryKey = key;
 		this.wait = wait;
-		return Inject();
+		return inject();
 	}
 	
 	/**
@@ -89,27 +90,27 @@ public class Audio
 	 * @param key The full repository path, including directory and file name, where to locate the audio file. Example - PRIVATE:dir1/dir2/name.mp3
 	 * @return
 	 */
-	public Boolean Inject(String key)
+	public Boolean inject(String key)
 	{
 		this.repositoryKey = key;
-		return Inject();
+		return inject();
 	}
 	
-	public Boolean Inject()
+	public Boolean inject()
 	{
-		params.clear();
+	  Map<String, Object> params = new HashMap<>();
 		params.put("key", repositoryKey);		
-		if (wait != null && wait)
+		if (wait != null)
 			params.put("wait", "wait");
 		
-		return Helper.ExecuteMethod(driver, COMMAND_INJECT_AUDIO, params);
+		return Helper.executeMethod(driver, COMMAND_INJECT_AUDIO, params);
 	}
 	
-	public Boolean VoiceAssistantInject(String text)
+	public Boolean voiceAssistantInject(String text)
 	{
-		params.clear();
+	  Map<String, Object> params = new HashMap<>();
 		params.put("text", text);
-		return Helper.ExecuteMethod(driver, COMMAND_VOICEASSIST, params);
+		return Helper.executeMethod(driver, COMMAND_VOICE_ASSIST, params);
 	}
 	
 	/**
@@ -122,48 +123,50 @@ public class Audio
 	 * @param profile Profile of the NLP network
 	 * @return
 	 */
-	public String ToText(String audioInput, String language, String phrase, String rate, String profile)
+	public String toText(String audioInput, String language, String phrase, String rate, String profile)
 	{
 		this.audioInput = audioInput;
 		this.language = language;
 		this.phrase = phrase;
 		this.rate = rate;
 		this.profile = profile;
-		return ToText();
+		return toText();
 	}
 	
-	public String ToText(String pathToAudio, String lanuage, String phrase, String rate)
+	public String toText(String audioInput, String language, String phrase, String rate)
 	{
 		this.audioInput = audioInput;
 		this.language = language;
 		this.phrase = phrase;
 		this.rate = rate;
-		return ToText();
+		return toText();
 	}
 	
-	public String ToText(String pathToAudio, String lanuage, String phrase)
+	public String toText(String audioInput, String language, String phrase)
 	{
 		this.audioInput = audioInput;
 		this.language = language;
 		this.phrase = phrase;
-		return ToText();
+		return toText();
 	}
 
-	public String ToText(String pathToAudio, String language)
+	public String ToText(String audioInput, String language)
 	{
 		this.audioInput = audioInput;
 		this.language = language;
-		return ToText();
+		return toText();
 	}
 	
-	public String ToText(String pathToAudio)
+	public String toText(String audioInput)
 	{
 		this.audioInput = audioInput;		
-		return ToText();
+		return toText();
 	}
 	
-	public String ToText()
+	public String toText()
 	{		
+	  Map<String, Object> params = new HashMap<>();
+	  
 		if (audioInput.startsWith("PUBLIC:") || audioInput.startsWith("PRIVATE:") || audioInput.startsWith("GROUP:"))
 			params.put("key", audioInput);
 		else
@@ -181,7 +184,7 @@ public class Audio
 		if (profile != null && !profile.isEmpty())
 			params.put("profile", profile);
 		
-		return Helper.ExecuteMethodString(driver, COMMAND_AUDIOTOTEXT, params);
+		return Helper.executeMethodString(driver, COMMAND_AUDIO_TO_TEXT, params);
 	}
 	
 	
@@ -194,40 +197,40 @@ public class Audio
 	 * @param isFemale Indicates the gender voice to use in the audio result file.
 	 * @return
 	 */
-	public String FromText(String text, String repositoryFile, String language, Boolean isFemale)
+	public String fromText(String text, String repositoryFile, String language, Boolean isFemale)
 	{
 		this.inputText = text;
 		this.repositoryFile = repositoryFile;
 		this.language = language;
 		this.isFemale = isFemale;
-		return FromText();
+		return fromText();
 	}
 	
-	public String TextToAudio(String text, String repositoryFile, String language)
+	public String textToAudio(String text, String repositoryFile, String language)
 	{
 		this.inputText = text;
 		this.repositoryFile = repositoryFile;
 		this.language = language;
-		return FromText();
+		return fromText();
 	}
 	
-	public String TextToAudio(String inputText, String repositoryFile)
+	public String textToAudio(String inputText, String repositoryFile)
 	{
 		this.inputText = inputText;
 		this.repositoryFile = repositoryFile;
-		return FromText();
+		return fromText();
 	}
 	
 
-	public String TextToAudio(String inputText)
+	public String textToAudio(String inputText)
 	{
 		this.inputText = inputText;
-		return FromText();
+		return fromText();
 	}
 	
-	public String FromText()
+	public String fromText()
 	{
-		params.clear();
+	  Map<String, Object> params = new HashMap<>();
 		
 		if (inputText.startsWith("PUBLIC:") || inputText.startsWith("PRIVATE:") || inputText.startsWith("GROUP:"))
 			params.put("key", inputText);
@@ -242,7 +245,7 @@ public class Audio
 		if (isFemale != null)
 			params.put("gender", isFemale ? "female" : "male");
 		
-		return Helper.ExecuteMethodString(driver, COMMAND_TEXTTOAUDIO, params);
+		return Helper.executeMethodString(driver, COMMAND_TEXTTO_AUDIO, params);
 		
 	}
 	
@@ -259,7 +262,7 @@ public class Audio
 	 * @param generic A generic audio parameter.
 	 * @return
 	 */
-	public String ValidateAudio(String deviceAudio, String repositoryKey, Double threshold, String profile, String silenceTrimmingType, Double silenceTrimmingLevel, String calibration, String generic)
+	public String validateAudio(String deviceAudio, String repositoryKey, Double threshold, String profile, String silenceTrimmingType, Double silenceTrimmingLevel, String calibration, String generic)
 	{
 		this.deviceAudioFile = deviceAudio;
 		this.repositoryKey = repositoryKey;
@@ -270,10 +273,10 @@ public class Audio
 		this.calibration = calibration;
 		this.generic = generic;
 		
-		return Validate();
+		return validate();
 	}
 	
-	public String Validate(String deviceAudio, String repositoryKey, Double threshold, String profile, String silenceTrimmingType, Double silenceTrimmingLevel, String calibration)
+	public String validate(String deviceAudio, String repositoryKey, Double threshold, String profile, String silenceTrimmingType, Double silenceTrimmingLevel, String calibration)
 	{
 		this.deviceAudioFile = deviceAudio;
 		this.repositoryKey = repositoryKey;
@@ -283,10 +286,10 @@ public class Audio
 		this.silenceTrimmingLevel = silenceTrimmingLevel;
 		this.calibration = calibration;
 		
-		return Validate();
+		return validate();
 	}
 	
-	public String ValidateAudio(String deviceAudio, String repositoryKey, Double threshold, String profile, String silenceTrimmingType, Double silenceTrimmingLevel)
+	public String validateAudio(String deviceAudio, String repositoryKey, Double threshold, String profile, String silenceTrimmingType, Double silenceTrimmingLevel)
 	{
 		this.deviceAudioFile = deviceAudio;
 		this.repositoryKey = repositoryKey;
@@ -295,10 +298,10 @@ public class Audio
 		this.silenceTrimmingType = silenceTrimmingType;
 		this.silenceTrimmingLevel = silenceTrimmingLevel;
 		
-		return Validate();
+		return validate();
 	}
 	
-	public String ValidateAudio(String deviceAudio, String repositoryKey, Double threshold, String profile, String silenceTrimmingType)
+	public String validateAudio(String deviceAudio, String repositoryKey, Double threshold, String profile, String silenceTrimmingType)
 	{
 		this.deviceAudioFile = deviceAudio;
 		this.repositoryKey = repositoryKey;
@@ -306,39 +309,39 @@ public class Audio
 		this.profile = profile;
 		this.silenceTrimmingType = silenceTrimmingType;
 		
-		return Validate();
+		return validate();
 	}
 	
-	public String ValidateAudio(String deviceAudio, String repositoryKey, Double threshold, String profile)
+	public String validateAudio(String deviceAudio, String repositoryKey, Double threshold, String profile)
 	{
 		this.deviceAudioFile = deviceAudio;
 		this.repositoryKey = repositoryKey;
 		this.threshold = threshold;
 		this.profile = profile;
 		
-		return Validate();
+		return validate();
 	}
 	
-	public String ValidateAudio(String deviceAudio, String repositoryKey, Double threshold)
+	public String validateAudio(String deviceAudio, String repositoryKey, Double threshold)
 	{
 		this.deviceAudioFile = deviceAudio;
 		this.repositoryKey = repositoryKey;
 		this.threshold = threshold;
 		
-		return Validate();
+		return validate();
 	}
 
-	public String ValidateAudio(String deviceAudio, String repositoryKey)
+	public String validateAudio(String deviceAudio, String repositoryKey)
 	{
 		this.deviceAudioFile = deviceAudio;
 		this.repositoryKey = repositoryKey;
 		
-		return Validate();
+		return validate();
 	}
 	
-	public String Validate()
+	public String validate()
 	{
-		params.clear();
+	  Map<String, Object> params = new HashMap<>();
 		
 		params.put("deviceAudio", deviceAudioFile);
 		params.put("key", repositoryKey);
@@ -361,7 +364,7 @@ public class Audio
 		if (calibration != null)
 			params.put("generic", generic);
 		
-		return Helper.ExecuteMethodString(driver, COMMAND_AUDIOVALIDATION, params);
+		return Helper.executeMethodString(driver, COMMAND_AUDIO_VALIDATION, params);
 	}
 	
 	
@@ -384,7 +387,7 @@ public class Audio
 	 * @param phrase Provides a list of phrases for speech-to-text library to use to avoid confusion. For example, provide the words:�two� and �four� to avoid confusion with �to� and �for�.
 	 * @return
 	 */
-	public Boolean ValidateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words, String exact, Double threshold, Integer confidence, String language, String rate, String profile, List<String> phrases)
+	public Boolean validateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words, String exact, Double threshold, Integer confidence, String language, String rate, String profile, List<String> phrases)
 	{
 		this.content = content;
 		this.audioInput = audioInput;
@@ -400,10 +403,10 @@ public class Audio
 		this.profile = profile;
 		this.phrases = phrases;
 		
-		return ValidateAudioToText();
+		return validateAudioToText();
 	}
 	
-	public Boolean ValidateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words, String exact, Double threshold, Integer confidence, String language, String rate, String profile)
+	public Boolean validateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words, String exact, Double threshold, Integer confidence, String language, String rate, String profile)
 	{
 		this.content = content;
 		this.audioInput = audioInput;
@@ -418,10 +421,10 @@ public class Audio
 		this.rate = rate;
 		this.profile = profile;
 		
-		return ValidateAudioToText();
+		return validateAudioToText();
 	}
 	
-	public Boolean ValidateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words, String exact, Double threshold, Integer confidence, String language, String rate)
+	public Boolean validateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words, String exact, Double threshold, Integer confidence, String language, String rate)
 	{
 		this.content = content;
 		this.audioInput = audioInput;
@@ -435,10 +438,10 @@ public class Audio
 		this.language = language;
 		this.rate = rate;
 		
-		return ValidateAudioToText();
+		return validateAudioToText();
 	}
 
-	public Boolean ValidateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words, String exact, Double threshold, Integer confidence, String language)
+	public Boolean validateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words, String exact, Double threshold, Integer confidence, String language)
 	{
 		this.content = content;
 		this.audioInput = audioInput;
@@ -451,10 +454,10 @@ public class Audio
 		this.confidence = confidence;
 		this.language = language;
 		
-		return ValidateAudioToText();
+		return validateAudioToText();
 	}
 	
-	public Boolean ValidateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words, String exact, Double threshold, Integer confidence)
+	public Boolean validateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words, String exact, Double threshold, Integer confidence)
 	{
 		this.content = content;
 		this.audioInput = audioInput;
@@ -466,10 +469,10 @@ public class Audio
 		this.threshold = threshold;
 		this.confidence = confidence;
 		
-		return ValidateAudioToText();
+		return validateAudioToText();
 	}
 	
-	public Boolean ValidateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words, String exact, Double threshold)
+	public Boolean validateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words, String exact, Double threshold)
 	{
 		this.content = content;
 		this.audioInput = audioInput;
@@ -480,10 +483,10 @@ public class Audio
 		this.exact = exact;
 		this.threshold = threshold;
 		
-		return ValidateAudioToText();
+		return validateAudioToText();
 	}
 	
-	public Boolean ValidateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words, String exact)
+	public Boolean validateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words, String exact)
 	{
 		this.content = content;
 		this.audioInput = audioInput;
@@ -493,10 +496,10 @@ public class Audio
 		this.words = words;
 		this.exact = exact;
 		
-		return ValidateAudioToText();
+		return validateAudioToText();
 	}
 	
-	public Boolean ValidateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words)
+	public Boolean validateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words)
 	{
 		this.content = content;
 		this.audioInput = audioInput;
@@ -505,10 +508,10 @@ public class Audio
 		this.index = index;
 		this.words = words;
 		
-		return ValidateAudioToText();
+		return validateAudioToText();
 	}
 	
-	public Boolean ValidateAudioToText(String content, String audioInput, String target, String match, Integer index)
+	public Boolean validateAudioToText(String content, String audioInput, String target, String match, Integer index)
 	{
 		this.content = content;
 		this.audioInput = audioInput;
@@ -516,38 +519,38 @@ public class Audio
 		this.match = match;
 		this.index = index;
 		
-		return ValidateAudioToText();
+		return validateAudioToText();
 	}
 	
-	public Boolean ValidateAudioToText(String content, String audioInput, String target, String match)
+	public Boolean validateAudioToText(String content, String audioInput, String target, String match)
 	{
 		this.content = content;
 		this.audioInput = audioInput;
 		this.target = target;
 		this.match = match;
 		
-		return ValidateAudioToText();
+		return validateAudioToText();
 	}
 
-	public Boolean ValidateAudioToText(String content, String audioInput, String target)
+	public Boolean validateAudioToText(String content, String audioInput, String target)
 	{
 		this.content = content;
 		this.audioInput = audioInput;
 		this.target = target;
-		return ValidateAudioToText();
+		return validateAudioToText();
 	}
 	
-	public Boolean ValidateAudioToText(String content, String audioInput)
+	public Boolean validateAudioToText(String content, String audioInput)
 	{
 		this.content = content;
 		this.audioInput = audioInput;
 		
-		return ValidateAudioToText();
+		return validateAudioToText();
 	}
 	
-	public Boolean ValidateAudioToText()
+	public Boolean validateAudioToText()
 	{
-		params.clear();
+	  Map<String, Object> params = new HashMap<>();
 		params.put("content", content);
 		
 		if (audioInput.startsWith("PUBLIC:") || audioInput.startsWith("PRIVATE:") || audioInput.startsWith("GROUP:"))
@@ -589,6 +592,6 @@ public class Audio
 		if (phrases != null)
 			params.put("phrase", phrases);
 		
-		return Helper.ExecuteMethod(driver, COMMAND_AUDIOTEXTVALIDATION, params);
+		return Helper.executeMethod(driver, COMMAND_AUDIO_TEXT_VALIDATION, params);
 	}
 }
