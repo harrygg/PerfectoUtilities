@@ -5,7 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openqa.selenium.remote.RemoteWebDriver;
+
+import io.appium.java_client.AppiumDriver;
 
 public class Audio
 {
@@ -36,7 +40,7 @@ public class Audio
 	public List<String> phrases;
 	
 	private Map<String, Object> params = new HashMap<>();
-	private RemoteWebDriver driver;
+	private AppiumDriver driver;
 	
 	private static final String COMMAND_INJECT_AUDIO = "mobile:audio:inject";
 	private static final String COMMAND_AUDIO_RECORDING_START = "mobile:audio.recording:start";
@@ -46,10 +50,11 @@ public class Audio
 	private static final String COMMAND_AUDIO_VALIDATION = "mobile:audio:validation";
 	private static final String COMMAND_AUDIO_TEXT_VALIDATION = "mobile:audio-text:validation";
 	private static final String COMMAND_AUDIO_TO_TEXT = "mobile:audio:text";
+	private Log log = LogFactory.getLog(Audio.class);
 	
-	public Audio(RemoteWebDriver driver)
+	public Audio(AppiumDriver driver)
 	{
-	  Logger.LogDebug("Creating Audio object");
+	  log.debug("Creating Audio object");
 		this.driver = driver;
 	}
 	

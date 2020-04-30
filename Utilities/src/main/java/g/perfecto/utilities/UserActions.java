@@ -14,20 +14,26 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import io.appium.java_client.AppiumDriver;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class UserActions {
 
-  private RemoteWebDriver driver;
+  private AppiumDriver driver;
 
   private final String COMMAND_DRAG = "mobile:touch:drag";
   private final String COMMAND_SWIPE = "mobile:touch:swipe";
   private final String COMMAND_TAP = "mobile:touch:tap";
   private final String COMMAND_PRESSKEY = "mobile:presskey";
   private final String COMMAND_SENDKEY = "mobile:key:event";
-
-  public UserActions(RemoteWebDriver driver) 
+  
+  private Log log = LogFactory.getLog(UserActions.class);
+  
+  public UserActions(AppiumDriver driver) 
   {
-    Logger.LogDebug("Creating UserActions object");
+    log.debug("Creating UserActions object");
     this.driver = driver;
   }	
 
@@ -43,8 +49,8 @@ public class UserActions {
 
     Map<String, Object> params = new HashMap<>();
 
-    if (location == null || location.trim().length() == 0){
-      System.out.println("Drag location not provided!");
+    if (location == null || location.isEmpty()){
+      log.error("Drag location not provided!");
       return false;
     }
 
@@ -53,7 +59,7 @@ public class UserActions {
     if (duration > 0) 
       params.put("duration", duration);
 
-    if (auxiliary != null && auxiliary.trim().length() > 0)
+    if (auxiliary != null && !auxiliary.isEmpty())
       params.put("auxiliary", auxiliary);
 
     return Helper.executeMethod(driver, COMMAND_DRAG, params);
@@ -90,11 +96,11 @@ public class UserActions {
     Map<String, Object> params = new HashMap<>();
 
     if (start == null || start.trim().length() == 0){
-      System.out.println("Start location not provided!");
+      log.error("Start location not provided!");
       return false;
     } 
     if (end == null || end.trim().length() == 0){
-      System.out.println("End location not provided!");
+      log.error("End location not provided!");
       return false;
     }
 
@@ -148,7 +154,7 @@ public class UserActions {
     Map<String, Object> params = new HashMap<>();
 
     if (location == null || location.trim().length() == 0){
-      System.out.println("ERROR! Drag location not provided!");
+      log.error("Drag location not provided!");
       return false;
     }
 
@@ -215,7 +221,7 @@ public class UserActions {
   {
     if (key == null || key.trim().length() == 0)
     {
-      System.out.println("ERROR! key not provided");
+      log.error("key not provided");
       return false;
     }
 
@@ -261,8 +267,8 @@ public class UserActions {
    */
   public void clickOn(WebElement element)
   {
-    Logger.LogInfo("------------------------------------------------");
-    Logger.LogInfo("Clicking on element " + element.toString());
+    log.info("------------------------------------------------");
+    log.info("Clicking on element " + element.toString());
     element.click();
   }
   
@@ -317,8 +323,8 @@ public class UserActions {
   public void tryClick(By by)
   {
     try {
-      Logger.LogInfo("------------------------------------------------");
-      Logger.LogInfo("Clicking on element " + by);
+      log.info("------------------------------------------------");
+      log.info("Clicking on element " + by);
       driver.findElement(by).click();
     } catch (Exception e) {
       e.printStackTrace();
@@ -355,11 +361,11 @@ public class UserActions {
   {
     if (clear == true)
     {
-      Logger.LogInfo("Clearing text from element " + el);
+      log.info("Clearing text from element " + el);
       el.clear();
     }
     
-    Logger.LogInfo("Typing text " + text + " in element " + el);
+    log.info("Typing text " + text + " in element " + el);
     el.sendKeys(text);
   }
   
@@ -436,13 +442,13 @@ public class UserActions {
   
   public String takeScreenshot()
   {
-    Logger.LogInfo("Taking screenshot as base64");
+    log.info("Taking screenshot as base64");
     return driver.getScreenshotAs(OutputType.BASE64);
   }
   
   public String takeScreenshotAsBase64()
   {
-    Logger.LogInfo("Taking screenshot as base64");
+    log.info("Taking screenshot as base64");
     return driver.getScreenshotAs(OutputType.BASE64);
   }
   
@@ -458,13 +464,13 @@ public class UserActions {
   
   public File takeScreenshotAsFile()
   {
-    Logger.LogInfo("Taking screenshot as file");
+    log.info("Taking screenshot as file");
     return driver.getScreenshotAs(OutputType.FILE);
   }
 
   public byte[] takeScreenshotAsBytes()
   {
-    Logger.LogInfo("Taking screenshot as file");
+    log.info("Taking screenshot as file");
     return driver.getScreenshotAs(OutputType.BYTES);
   }
 

@@ -6,12 +6,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
+import io.appium.java_client.AppiumDriver;
+
 public class Device {
 
-  private RemoteWebDriver driver = null;
+  private AppiumDriver driver = null;
   
   public String target;
 
@@ -70,7 +74,9 @@ public class Device {
   public static final String AUDIO_MATCH_MODE_LAST = "last";
   public static final String AUDIO_MATCH_MODE_INDEX = "index";
   
-  public Device(RemoteWebDriver driver)
+  private Log log = LogFactory.getLog(Device.class);
+  
+  public Device(AppiumDriver driver)
   {
     Logger.LogDebug("Creating Device object");
     this.driver = driver;
@@ -157,17 +163,17 @@ public class Device {
     if (operation != null && (operation == ROTATE_OPERATION_RESET || operation == ROTATE_OPERATION_NEXT))
       params.put("operation", operation);
     else
-      System.out.println("WARNING! Unsupported operation value '" + operation + "'. Possible values are: " + ROTATE_OPERATION_RESET + " or " + ROTATE_OPERATION_NEXT);
+      log.warn("Unsupported operation value '" + operation + "'. Possible values are: " + ROTATE_OPERATION_RESET + " or " + ROTATE_OPERATION_NEXT);
 
     if (state != null && (state == ROTATE_STATE_PORTRAIT || state == ROTATE_STATE_LANDSCAPE))
       params.put("state", state);
     else
-      System.out.println("WARNING! Unsupported state value '" + state + "'. Possible values are: " + ROTATE_STATE_PORTRAIT + " or " + ROTATE_STATE_LANDSCAPE);
+      log.warn("Unsupported state value '" + state + "'. Possible values are: " + ROTATE_STATE_PORTRAIT + " or " + ROTATE_STATE_LANDSCAPE);
 
     if (method != null && (state == ROTATE_METHOD_DEVICE || state == ROTATE_METHOD_VIEW))
       params.put("method", method);
     else
-      System.out.println("WARNING! Unsupported method value '" + method + "'. Possible values are: " + ROTATE_METHOD_DEVICE + " or " + ROTATE_METHOD_VIEW);
+      log.warn("Unsupported method value '" + method + "'. Possible values are: " + ROTATE_METHOD_DEVICE + " or " + ROTATE_METHOD_VIEW);
 
     return Helper.executeMethod(driver, COMMAND_ROTATE, params);
   }

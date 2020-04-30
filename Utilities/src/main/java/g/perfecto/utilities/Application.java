@@ -9,9 +9,13 @@ import org.openqa.selenium.remote.DriverCommand;
 import org.openqa.selenium.remote.RemoteExecuteMethod;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
+import io.appium.java_client.AppiumDriver;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 public class Application {
 
-  private RemoteWebDriver driver = null;
+  private AppiumDriver driver = null;
   public String id = null;
   public String name = null;
   public String path = null;
@@ -49,35 +53,42 @@ public class Application {
   private final String COMMAND_SENSOR_AUTHENTICATE = "mobile:sensorAuthentication:set";
   private final String COMMAND_FINGERPRINT_AUTHENTICATE = "mobile:fingerprint:set";
 
-  public Application(RemoteWebDriver driver) {
-    Logger.LogDebug("Creating Application object");
-    this.driver = driver;
+  private Log log;
+  
+  public Application(AppiumDriver driver) {
+    this(driver, null, null, false, false);
   }
 
-  public Application(RemoteWebDriver driver, String path) {
-    this.driver = driver;
-    this.path = path;
+  public Application(AppiumDriver driver, String path) {
+    this(driver, path, null, false, false);
   }
 
-  public Application(RemoteWebDriver driver, String path, String id) {
-    this.driver = driver;
-    this.path = path;
-    this.id = id;
+  public Application(AppiumDriver driver, String path, String id) {
+    this(driver, path, id, false, false);
   }
 
-  public Application(RemoteWebDriver driver, String path, String id, Boolean install) {
-    this.driver = driver;
-    this.path = path;
-    this.id = id;
-
-    if (install)
-      install();
+  public Application(AppiumDriver driver, String path, String id, Boolean install) {
+    this(driver, path, id, install, false);
   }
 
-  public Application(RemoteWebDriver driver, String path, String id, Boolean install, Boolean launch) {
+  public Application(AppiumDriver driver, String path, String id, Boolean install, Boolean launch) 
+  {
+    log = LogFactory.getLog(this.getClass());
+    log.debug("Creating Application object");
+    
     this.driver = driver;
-    this.path = path;
-    this.id = id;
+    
+    if (path != null && !path.isEmpty())
+    {
+      log.debug("path=" + path);
+      this.path = path;      
+    }
+    
+    if (id != null && !id.isEmpty())
+    {
+      log.debug("id=" + id);
+      this.id = id;
+    }
 
     if (install)
       install();
@@ -96,8 +107,8 @@ public class Application {
 
     Map<String, Object> params = new HashMap<>();
 
-    if (path == null || path.trim().length() == 0) {
-      Logger.LogError("App path not provided!");
+    if (path == null || path.isEmpty()) {
+      log.error("App path not provided!");
       return false;
     }
 
@@ -134,13 +145,13 @@ public class Application {
     String type = "identifier";
 
     // If we don't have app id, use name
-    if (id == null || id.trim().length() == 0) {
+    if (id == null || id.isEmpty()) {
 
-      if (name != null && name.trim().length() > 0) {
+      if (name != null && !id.isEmpty()) {
         type = "name";
         identifier = name;
       } else {
-        Logger.LogError("No app id or name provided! App not uninstalled!");
+        log.error("No app id or name provided! App not uninstalled!");
         return false;
       }
     }
@@ -163,18 +174,18 @@ public class Application {
     String type = "identifier";
 
     // If we don't have app id, use name
-    if (id == null || id.trim().length() == 0) {
-      if (name != null && name.trim().length() > 0) {
+    if (id == null || id.isEmpty()) {
+      if (name != null && !id.isEmpty()) {
         type = "name";
         identifier = name;
       } else {
-        Logger.LogError("No app id or name provided! App not started!");
+        log.error("No app id or name provided! App not started!");
         return false;
       }
     }
 
     params.put(type, identifier);
-    Logger.LogInfo("Starting app " + identifier + " identified by its " + type);
+    log.info("Starting app " + identifier + " identified by its " + type);
 
     switchToNativeContext();
     return Helper.executeMethod(driver, COMMAND_OPEN, params);
@@ -256,13 +267,13 @@ public class Application {
         type = "name";
         identifier = name;
       } else {
-        Logger.LogError("No app id or name provided! App not closed!");
+        log.error("No app id or name provided! App not closed!");
         return false;
       }
     }
 
     params.put(type, identifier);
-    Logger.LogInfo("Closing app " + identifier + " identified by its " + type);
+    log.info("Closing app " + identifier + " identified by its " + type);
 
     return Helper.executeMethod(driver, COMMAND_CLOSE, params);
   }
@@ -354,13 +365,13 @@ public class Application {
    */
   public Boolean startActivity(String activityName) {
 
-    if (id == null || id.trim().length() == 0) {
-      Logger.LogError("App id is not provided!");
+    if (id == null || id.isEmpty()) {
+      log.error("App id is not provided!");
       return false;
     }
 
-    if (activityName == null || activityName.trim().length() == 0) {
-      Logger.LogError("App activityName is not provided!");
+    if (activityName == null || activityName.isEmpty()) {
+      log.error("App activityName is not provided!");
       return false;
     }
 
@@ -400,13 +411,13 @@ public class Application {
   public Boolean syncActivity(String activityName) {
     Map<String, Object> params = new HashMap<>();
 
-    if (id == null || id.trim().length() == 0) {
-      Logger.LogError("App id is not provided!");
+    if (id == null || id.isEmpty()) {
+      log.error("App id is not provided!");
       return false;
     }
 
-    if (activityName == null || activityName.trim().length() == 0) {
-      Logger.LogError("App activity is not provided!");
+    if (activityName == null || activityName.isEmpty()) {
+      log.error("App activity is not provided!");
       return false;
     }
 
@@ -432,8 +443,8 @@ public class Application {
   public Boolean startImageInjection(String repositoryFile) {
     Map<String, Object> params = new HashMap<>();
 
-    if (repositoryFile.trim().length() == 0) {
-      Logger.LogError("No repositoryFile specified!");
+    if (repositoryFile.isEmpty()) {
+      log.error("No repositoryFile specified!");
       return false;
     }
 
@@ -442,9 +453,9 @@ public class Application {
     if (adjustment != null)
       params.put("adjustment", adjustment);
 
-    if (id == null || id.trim().length() == 0) {
-      if (name == null || name.trim().length() == 0) {
-        Logger.LogError("No app id or name specified!");
+    if (id == null || id.isEmpty()) {
+      if (name == null || name.isEmpty()) {
+        log.error("No app id or name specified!");
       } else {
         params.put("name", name);
       }
@@ -500,7 +511,7 @@ public class Application {
   public Boolean switchToContext(String context) {
     if (!context.equalsIgnoreCase(CONTEXT_WEB) && !context.equalsIgnoreCase(CONTEXT_NATIVE)
         && !context.equalsIgnoreCase(CONTEXT_VISUAL)) {
-      Logger.LogError("Unsupported context value: " + context);
+      log.error("Unsupported context value: " + context);
       return false;
     }
 
@@ -509,7 +520,7 @@ public class Application {
     params.put("name", context);
 
     try {
-      Logger.LogInfo("Switching to '" + context + "' context.");
+      log.info("Switching to '" + context + "' context.");
       executeMethod.execute(DriverCommand.SWITCH_TO_CONTEXT, params);
     } catch (Exception e) {
       e.printStackTrace();
@@ -533,14 +544,14 @@ public class Application {
   public String getCurrentContextHandle() {
     RemoteExecuteMethod executeMethod = new RemoteExecuteMethod(driver);
     String context = (String) executeMethod.execute(DriverCommand.GET_CURRENT_CONTEXT_HANDLE, null);
-    Logger.LogInfo("Current context: " + context);
+    log.info("Current context: " + context);
     return context;
   }
 
   public List<String> getContextHandles() {
     RemoteExecuteMethod executeMethod = new RemoteExecuteMethod(driver);
     List<String> contexts = (List<String>) executeMethod.execute(DriverCommand.GET_CONTEXT_HANDLES, null);
-    Logger.LogInfo("List of available contexts: " + String.join(", ", contexts));
+    log.info("List of available contexts: " + String.join(", ", contexts));
 
     return contexts;
   }
@@ -568,12 +579,12 @@ public class Application {
         type = "name";
         identifier = name;
       } else {
-        Logger.LogError("No app id or name provided! SetAuthentication canceled!");
+        log.error("No app id or name provided! SetAuthentication canceled!");
         return false;
       }
     }
 
-    Logger.LogInfo("SetAuthentication on app '" + identifier + "' identified by its " + type);
+    log.info("SetAuthentication on app '" + identifier + "' identified by its " + type);
     params.put(type, identifier);
     params.put("resultAuth", success ? "success" : "fail");
     if (errorType != null && !errorType.isEmpty())

@@ -2,6 +2,8 @@ package g.perfecto.utilities;
 
 import java.lang.reflect.Modifier;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 public class Capabilities
@@ -154,6 +156,8 @@ public class Capabilities
 
   public DesiredCapabilities dc = new DesiredCapabilities();
   
+  private Log log = LogFactory.getLog(Capabilities.class);
+  
   public Capabilities()
   {
   }
@@ -163,17 +167,19 @@ public class Capabilities
     Class cls = this.getClass();
     java.lang.reflect.Field[] fieldlist = cls.getDeclaredFields();
     
-    Logger.LogDebug("Converting Capabilities object to DesiredCapabilities");
+    log.debug("Converting Capabilities object to DesiredCapabilities");
 
     for (int i  = 0; i < fieldlist.length; i++) {
       String name = fieldlist[i].getName();
       // If it's not a constant and not a DesiredCapbilities object
-      if ((fieldlist[i].getModifiers() & Modifier.FINAL) != Modifier.FINAL && !fieldlist[i].getType().equals(DesiredCapabilities.class))
+      if ((fieldlist[i].getModifiers() & Modifier.FINAL) != Modifier.FINAL 
+          && !fieldlist[i].getType().equals(DesiredCapabilities.class) 
+          && !fieldlist[i].getType().equals(Log.class))
       {
         String value = String.valueOf(fieldlist[i].get(this)); 
         if (value != "null")
         {
-          Logger.LogDebug(name + ": " + value);
+          log.debug(name + ": " + value);
           dc.setCapability(name, value);
         }        
       }

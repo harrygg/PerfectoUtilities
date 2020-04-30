@@ -3,12 +3,15 @@ package g.perfecto.utilities;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 public class Helper {
 
   public static int logLevel = 2;
-
+  private static Log log = LogFactory.getLog(Helper.class);
+  
   public static Boolean executeMethod(RemoteWebDriver driver, String methodName, Map<String, Object> params)
   {
     String res = executeMethodString(driver, methodName, params);
@@ -20,27 +23,23 @@ public class Helper {
   public static String executeMethodString(RemoteWebDriver driver, String methodName, Map<String, Object> params)
   {
     try {
-      if (logLevel > 0)
+      log.info("------------------------------------------------");
+      log.info("Executing method: " + methodName);
+
+      if (params.size() > 0)
       {
-        Logger.LogInfo("------------------------------------------------");
-        Logger.LogInfo("Executing method: " + methodName);
+        log.info("Arguments:");
+        for (Map.Entry<String, Object> entry : params.entrySet())  
+          log.info("  " + entry.getKey() + ": " + entry.getValue());
       }
-      if (logLevel > 1) 
-      {
-        if (params.size() > 0)
-        {
-          Logger.LogInfo("Arguments:");
-          for (Map.Entry<String, Object> entry : params.entrySet())  
-            Logger.LogInfo("  " + entry.getKey() + ": " + entry.getValue());
-        }
-      }
+      
       String res = (String) driver.executeScript(methodName, params);
-      Logger.LogInfo("RESULT: " + res);
+      log.info("Result: " + res);
       return res;
     }
     catch (Exception ex)
     {
-      Logger.LogError("Failed to execute method: " + methodName);
+      log.error("Failed to execute method: " + methodName);
       ex.printStackTrace(); 
       return null;
     }

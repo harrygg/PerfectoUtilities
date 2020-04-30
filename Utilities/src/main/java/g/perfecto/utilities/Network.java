@@ -2,11 +2,15 @@ package g.perfecto.utilities;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openqa.selenium.remote.RemoteWebDriver;
+
+import io.appium.java_client.AppiumDriver;
 
 public class Network {
 
-  private RemoteWebDriver driver = null;
+  private AppiumDriver driver = null;
   private Map<String, Object> params = new HashMap<>();
   
   private final static String COMMAND_VNETWORK_START = "mobile:vnetwork:start";
@@ -51,7 +55,9 @@ public class Network {
   public final static String PROFILE_4G_4G_LTE_ADVANCED_POOR = "4g_lte_advanced_poor";
   public final static String PROFILE_BANDWIDTH_GOOD = "bandwidth_good";
 
-  public Network(RemoteWebDriver driver) 
+  private Log log = LogFactory.getLog(Network.class);
+  
+  public Network(AppiumDriver driver) 
   {
     Logger.LogDebug("Creating Network object");
     this.driver = driver;

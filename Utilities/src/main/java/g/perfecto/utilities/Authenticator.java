@@ -5,6 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,10 +15,11 @@ import org.openqa.selenium.remote.JsonException;
 import com.google.gson.JsonObject;
 
 public class Authenticator {
+  
   public static Path tokensFilePath = Paths.get(System.getenv("HOMEPATH"), "perfectoTokens.json");
-
   private static JSONObject tokensObj = null;
-
+  private static Log log = LogFactory.getLog(Authenticator.class);
+  
   private static JSONObject getTokensObject() {
     try {
 
@@ -25,7 +28,7 @@ public class Authenticator {
         tokensObj = new JSONObject(jsonString);
       }
     } catch (JsonException je) {
-      Logger.LogError("The file " + tokensFilePath + " does not contain a valid JSON object!");
+      log.error("The file " + tokensFilePath + " does not contain a valid JSON object!");
       je.printStackTrace();
     } catch (Exception e) {
       e.printStackTrace();
@@ -41,13 +44,13 @@ public class Authenticator {
       JSONObject t = tokens.getJSONObject(i);
       String key = t.keys().next();
       if (key.equals(host)) {
-        Logger.LogDebug("Found token for " + host + " cloud!");
+        log.debug("Found token for " + host + " cloud!");
         token = t.getString(key);
         count++;
       }
     }
     if (count > 1)
-      Logger.LogWarning("Multiple tokens found for cloud " + host);
+      log.warn("Multiple tokens found for cloud " + host);
     return token;
   }
 }

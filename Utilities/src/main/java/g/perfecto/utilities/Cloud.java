@@ -2,19 +2,25 @@ package g.perfecto.utilities;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openqa.selenium.remote.RemoteWebDriver;
+
+import io.appium.java_client.AppiumDriver;
 
 public class Cloud
 {
-  private RemoteWebDriver driver = null;
+  private AppiumDriver driver;
 
   public final static String COMMAND_GATEWAY_CALL = "mobile:gateway:call";
   public final static String COMMAND_GATEWAY_EMAIL = "mobile:gateway:email";
   public final static String COMMAND_GATEWAY_SMS = "mobile:gateway:sms";
 
-  public Cloud(RemoteWebDriver driver) 
+  private Log log = LogFactory.getLog(Cloud.class);
+  
+  public Cloud(AppiumDriver driver) 
   {
-    Logger.LogDebug("Creating Cloud object");
+    log.debug("Creating Cloud object");
     this.driver = driver;
   }
 

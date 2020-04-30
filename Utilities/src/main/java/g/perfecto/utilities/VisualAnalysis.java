@@ -4,11 +4,15 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openqa.selenium.remote.RemoteWebDriver;
+
+import io.appium.java_client.AppiumDriver;
 
 public class VisualAnalysis {
 
-  private RemoteWebDriver driver;
+  private AppiumDriver driver;
   private Map<String, Object> params = new HashMap<>();
 
   public String label;
@@ -174,9 +178,11 @@ public class VisualAnalysis {
   private final static String COMMAND_TEXT_FIND = "mobile:text:find";
   private final static String COMMAND_SCREENTEXT = "mobile:screen:text";
 
-  public VisualAnalysis(RemoteWebDriver driver)
+  private Log log = LogFactory.getLog(VisualAnalysis.class);
+  
+  public VisualAnalysis(AppiumDriver driver)
   {
-    Logger.LogDebug("Creating VisualAnalysis object");
+    log.debug("Creating VisualAnalysis object");
     this.driver = driver;
   }
 
@@ -691,7 +697,7 @@ public class VisualAnalysis {
   {
     if (parameterValue == null || parameterValue.trim().isEmpty())
     {
-      Logger.LogError("Missing mandatory parameter " + parameterName);
+      log.error("Missing mandatory parameter " + parameterName);
       return false;
     }
     params.put(parameterName, parameterValue);

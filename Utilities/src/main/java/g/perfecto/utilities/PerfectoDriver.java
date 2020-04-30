@@ -8,9 +8,11 @@ import java.util.concurrent.TimeUnit;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Wait;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.perfecto.reportium.client.ReportiumClient;
 import com.perfecto.reportium.client.ReportiumClientFactory;
@@ -51,6 +53,8 @@ public class PerfectoDriver
   public Integer waitForElementTimeout = 15;
   public Wait<WebDriver> wait;
   
+  private Log log = LogFactory.getLog(PerfectoDriver.class);
+  
   public PerfectoDriver()
   {
     
@@ -60,13 +64,13 @@ public class PerfectoDriver
   {
     if (host == null)
     {
-      Logger.LogError("No host provided for driver URL. Exiting.");
+      log.error("No host provided for driver URL. Exiting.");
       return;
     }
     
     try {
       URL driverUrl = new URL("https://" + host + ".perfectomobile.com/nexperience/perfectomobile/wd/hub/fast");
-      Logger.LogInfo("Driver URL: " + driverUrl);
+      log.info("Driver URL: " + driverUrl);
       
       if (capabilities.securityToken == null)
         capabilities.securityToken = Authenticator.getTokenForCloud(host);
@@ -74,10 +78,10 @@ public class PerfectoDriver
       desiredCapabilities.merge(capabilities.toSeleniumCapabilities());
       
       Map <String, Object> caps = (Map<String, Object>) desiredCapabilities.asMap();
-      Logger.LogInfo("-----------------------------------------------");
-      Logger.LogInfo("Using capabilities:");
+      log.info("-----------------------------------------------");
+      log.info("Using capabilities:");
       for (Map.Entry<String, Object> entry : caps.entrySet())
-        Logger.LogInfo(entry.getKey() + ": " + entry.getValue()); 
+        log.info(entry.getKey() + ": " + entry.getValue()); 
       
       if (desiredCapabilities.getPlatform() == Platform.ANDROID)
         driver = new AndroidDriver(driverUrl, desiredCapabilities);
@@ -85,7 +89,7 @@ public class PerfectoDriver
         driver = new IOSDriver(driverUrl, desiredCapabilities);
       else
         driver = new AppiumDriver(driverUrl, desiredCapabilities);
-      Logger.LogDebug("Created " + driver + " type object");
+      log.debug("Created " + driver + " type object");
       
       userActions = new UserActions(driver);
       visualAnalysis = new VisualAnalysis(driver);
@@ -104,7 +108,9 @@ public class PerfectoDriver
         .withWebDriver(driver)
         .build();
       
+      log.debug("Creating new ReportiumClient");
       reportiumClient = new ReportiumClientFactory().createPerfectoReportiumClient(perfectoExecutionContext);
+      log.debug("Created " + reportiumClient.getClass().getPackage().getSpecificationTitle() + "  " + reportiumClient.getClass().getPackage().getSpecificationVersion());
       
       wait = new FluentWait<WebDriver>(driver)
         .withTimeout(waitForElementTimeout, TimeUnit.SECONDS)
@@ -132,7 +138,7 @@ public class PerfectoDriver
   
   public void sleep(Integer seconds) throws InterruptedException
   {
-    Logger.LogInfo("Waiting for " + seconds + " seconds");
+    log.info("Waiting for " + seconds + " seconds");
     Thread.sleep(seconds * 1000);
   }
 }
