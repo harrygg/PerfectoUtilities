@@ -18,15 +18,14 @@ import com.perfecto.reportium.model.Job;
 import com.perfecto.reportium.model.PerfectoExecutionContext;
 import com.perfecto.reportium.model.Project;
 
-//import g.perfecto.utilities.Authenticator;
-//import g.perfecto.utilities.Logger;
 import g.perfecto.utilities.*;
+import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
 
 public class PerfectoDriver
 {
-  public RemoteWebDriver driver;
+  public AppiumDriver driver;
   public String host;
   public Integer implicitWait = 15;
   public String projectName = "My Project";
@@ -85,7 +84,7 @@ public class PerfectoDriver
       else if(desiredCapabilities.getPlatform() == Platform.IOS)
         driver = new IOSDriver(driverUrl, desiredCapabilities);
       else
-        driver = new RemoteWebDriver(driverUrl, desiredCapabilities);
+        driver = new AppiumDriver(driverUrl, desiredCapabilities);
       Logger.LogDebug("Created " + driver + " type object");
       
       userActions = new UserActions(driver);
@@ -117,13 +116,13 @@ public class PerfectoDriver
     }
   }
   
-  public void init(Capabilities capabilities) throws MalformedURLException, IllegalArgumentException, IllegalAccessException
+  public void init(Capabilities capabilities)
   {
     this.capabilities = capabilities;
     init();
   }
   
-  public void init(String host, Capabilities capabilities) throws MalformedURLException, IllegalArgumentException, IllegalAccessException
+  public void init(String host, Capabilities capabilities)
   {
     this.host = host;
     this.capabilities = capabilities;

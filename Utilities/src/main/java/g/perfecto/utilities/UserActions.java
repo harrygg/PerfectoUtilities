@@ -297,7 +297,7 @@ public class UserActions {
 
   public void clickOnText(String text)
   {
-    clickOn(driver.findElement(By.xpath("//*[@value=\"" + text + "\"] | //*[@label=\"" + text + "\"]")));
+    clickOn(driver.findElement(By.xpath("(//*[@value=\"" + text + "\"] | //*[@label=\"" + text + "\"] | //*[text()=\"" + text + "\"])[1]")));
   }
 
   public void clickOnName(String name) {

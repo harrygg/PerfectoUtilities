@@ -533,7 +533,7 @@ public class Application {
   public String getCurrentContextHandle() {
     RemoteExecuteMethod executeMethod = new RemoteExecuteMethod(driver);
     String context = (String) executeMethod.execute(DriverCommand.GET_CURRENT_CONTEXT_HANDLE, null);
-    Logger.LogError("Current context: " + context);
+    Logger.LogInfo("Current context: " + context);
     return context;
   }
 
