@@ -3,3 +3,6 @@
 Perfecto_Scripts/
 Test_Utilities/
 target/
+remote.tests/test-output
+remote.tests/target/
+remote.tests/src/test/java/g/perfecto/remote/tests/*Test.java

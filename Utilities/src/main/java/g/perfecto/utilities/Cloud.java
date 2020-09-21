@@ -4,24 +4,22 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openqa.selenium.remote.RemoteWebDriver;
-
-import io.appium.java_client.AppiumDriver;
 
 public class Cloud
 {
-  private AppiumDriver driver;
+  private PerfectoDriver perfectoDriver;
 
   public final static String COMMAND_GATEWAY_CALL = "mobile:gateway:call";
   public final static String COMMAND_GATEWAY_EMAIL = "mobile:gateway:email";
   public final static String COMMAND_GATEWAY_SMS = "mobile:gateway:sms";
 
-  private Log log = LogFactory.getLog(Cloud.class);
+  private Log log;
   
-  public Cloud(AppiumDriver driver) 
+  public Cloud(PerfectoDriver driver) 
   {
-    log.debug("Creating Cloud object");
-    this.driver = driver;
+    log = LogFactory.getLog(this.getClass());
+    log.debug("Creating " + this.getClass() + " object");
+    perfectoDriver = driver;
   }
 
   /**
@@ -29,11 +27,11 @@ public class Cloud
    * @param deviceId The destination device. It is possible to select multiple devices (separated by commas).
    * @return
    */
-  public Boolean CallDevice(String deviceId)
+  public Boolean callDevice(String deviceId)
   {
     Map<String, Object> params = new HashMap<>();
     params.put("to.device", deviceId);
-    return Helper.executeMethod(driver, COMMAND_GATEWAY_CALL, params);
+    return perfectoDriver.executor.executeMethod(COMMAND_GATEWAY_CALL, params);
   }
 
   /**
@@ -42,22 +40,22 @@ public class Cloud
    * Format -  +[country code][area code][phone number], example -  +17812054111
    * @return
    */
-  public Boolean CallNumber(String number)
+  public Boolean callNumber(String number)
   {
     Map<String, Object> params = new HashMap<>();
     params.put("to.number", number);
-    return Helper.executeMethod(driver, COMMAND_GATEWAY_CALL, params);
+    return perfectoDriver.executor.executeMethod(COMMAND_GATEWAY_CALL, params);
   }
 
   /**
    * Generates an external voice call recording to the user currently running the script.
    * @return
    */
-  public Boolean CallCurrentUser()
+  public Boolean callCurrentUser()
   {
     Map<String, Object> params = new HashMap<>();
     params.put("to.user", "user");
-    return Helper.executeMethod(driver, COMMAND_GATEWAY_CALL, params);
+    return perfectoDriver.executor.executeMethod(COMMAND_GATEWAY_CALL, params);
   }
 
   /**
@@ -68,11 +66,11 @@ public class Cloud
      The business number field does not apply.
    * @return
    */
-  public Boolean CallUser(String user)
+  public Boolean callUser(String user)
   {
     Map<String, Object> params = new HashMap<>();
     params.put("to.user", user);
-    return Helper.executeMethod(driver, COMMAND_GATEWAY_CALL, params);
+    return perfectoDriver.executor.executeMethod(COMMAND_GATEWAY_CALL, params);
   }
 
   /**
@@ -81,12 +79,12 @@ public class Cloud
    * @param content The message text for this command.
    * @return
    */
-  public Boolean SendSMSToDeivce(String deviceId, String content)
+  public Boolean sendSMSToDeivce(String deviceId, String content)
   {
     Map<String, Object> params = new HashMap<>();
     params.put("to.handset", deviceId);
     params.put("body", content);
-    return Helper.executeMethod(driver, COMMAND_GATEWAY_SMS, params);
+    return perfectoDriver.executor.executeMethod(COMMAND_GATEWAY_SMS, params);
   }
 
   /**
@@ -98,12 +96,12 @@ public class Cloud
    * @param content The message text for this command.
    * @return
    */
-  public Boolean SendSMSToUser(String user, String content)
+  public Boolean sendSMSToUser(String user, String content)
   {
     Map<String, Object> params = new HashMap<>();
     params.put("to.handset", user);
     params.put("body", content);
-    return Helper.executeMethod(driver, COMMAND_GATEWAY_SMS, params);
+    return perfectoDriver.executor.executeMethod(COMMAND_GATEWAY_SMS, params);
   }
 
   /**
@@ -111,11 +109,11 @@ public class Cloud
    * @param content The message text for this command.
    * @return
    */
-  public Boolean SendSMSToCurrentUser(String content)
+  public Boolean sendSMSToCurrentUser(String content)
   {
     Map<String, Object> params = new HashMap<>();
     params.put("body", content);
-    return Helper.executeMethod(driver, COMMAND_GATEWAY_SMS, params);
+    return perfectoDriver.executor.executeMethod(COMMAND_GATEWAY_SMS, params);
   }
 
   /**
@@ -125,22 +123,22 @@ public class Cloud
    * @param content The message text for this command.
    * @return
    */
-  public Boolean SendSMSToNumber(String number, String content)
+  public Boolean sendSMSToNumber(String number, String content)
   {
     Map<String, Object> params = new HashMap<>();
     params.put("to.handset", number);
     params.put("body", content);
-    return Helper.executeMethod(driver, COMMAND_GATEWAY_SMS, params);
+    return perfectoDriver.executor.executeMethod(COMMAND_GATEWAY_SMS, params);
   }
 
   /**
    * Sends an email message to the selected destination
-   * @param to The email address for this command.
+   * @param to an array of email address for this command.
    * @param body The message text for this command. <default is "test email">
    * @param subject The message subject for this command. <default is "none">
    * @return
    */
-  public Boolean SendEmail(String to, String body, String subject)
+  public Boolean sendEmails(String[] to, String body, String subject)
   {
     Map<String, Object> params = new HashMap<>();
     params.put("to.address", to);
@@ -148,30 +146,51 @@ public class Cloud
       params.put("body", body);
     if (subject != null)
       params.put("subject", subject);
-    return Helper.executeMethod(driver, COMMAND_GATEWAY_EMAIL, params);
+    return perfectoDriver.executor.executeMethod(COMMAND_GATEWAY_EMAIL, params);
   }
-
   /**
    * Sends an email message to the selected destination
-   * @param to The email address for this command.
-   * @param body The message text for this command. The subject is "none"
-   */
-  public Boolean SendEmail(String to, String body)
-  {
-    return SendEmail(to, body, null);
-  }
-
-  /**
-   * Sends an email message to the selected destination
-   * @param to The email address for this command. 
+   * @param to an array of email addresses for this command. 
    * Body is "test email", subject is "none"
    * @return
    */
-  public Boolean SendEmail(String to)
+  public Boolean sendEmails(String[] to, String subject)
   {
-    return SendEmail(to, null, null);
+    return sendEmails(to, subject, null);
+  }
+  
+  /**
+   * Sends an email message to the selected destination
+   * @param to an array of email addresses for this command. 
+   * Body is "test email", subject is "none"
+   * @return
+   */
+  public Boolean sendEmails(String[] to)
+  {
+    return sendEmails(to, null, null);
   }
 
+  /**
+   * Sends an email message to the selected destination
+   * @param to email address for this command.
+   * @param body The message text for this command. <default is "test email">
+   * @param subject The message subject for this command. <default is "none">
+   * @return
+   */
+  public Boolean sendEmail(String to, String body, String subject)
+  {
+    return sendEmails(new String[] {to}, body, subject);
+  }
+  
+  public Boolean sendEmail(String to, String body)
+  {
+    return sendEmails(new String[] {to}, body, null);
+  }
+  
+  public Boolean sendEmail(String to)
+  {
+    return sendEmails(new String[] {to}, null, null);
+  } 
   /**
    * Sends an email message to the selected destination
    * @param deviceId The destination device. It is possible to select multiple devices.
@@ -179,7 +198,7 @@ public class Cloud
    * @param subject The message subject for this command. <default is "none">
    * @return
    */
-  public Boolean SendEmailToDevice(String deviceId, String body, String subject)
+  public Boolean sendEmailToDevice(String deviceId, String body, String subject)
   {
     Map<String, Object> params = new HashMap<>();
     
@@ -191,7 +210,7 @@ public class Cloud
     if (subject != null)
       params.put("subject", subject);
     
-    return Helper.executeMethod(driver, COMMAND_GATEWAY_EMAIL, params);
+    return perfectoDriver.executor.executeMethod(COMMAND_GATEWAY_EMAIL, params);
   }
 
   /**
@@ -200,9 +219,9 @@ public class Cloud
    * @param body The message text for this command. Subject defaults to "none"
    * @return
    */
-  public Boolean SendEmailToDevice(String deviceId, String body)
+  public Boolean sendEmailToDevice(String deviceId, String body)
   {
-    return SendEmailToDevice(deviceId, body, null);
+    return sendEmailToDevice(deviceId, body, null);
   }
 
   /**
@@ -211,9 +230,9 @@ public class Cloud
    * The body and the subject default to "none"
    * @return
    */
-  public Boolean SendEmailToDevice(String deviceId)
+  public Boolean sendEmailToDevice(String deviceId)
   {
-    return SendEmailToDevice(deviceId, null, null);
+    return sendEmailToDevice(deviceId, null, null);
   }
 
   /**
@@ -223,7 +242,7 @@ public class Cloud
    * @param subject The message subject for this command. <default is "none">
    * @return
    */
-  public Boolean SendEmailToUser(String userEmail, String body, String subject)
+  public Boolean sendEmailToUser(String userEmail, String body, String subject)
   {
     Map<String, Object> params = new HashMap<>();
     
@@ -235,19 +254,19 @@ public class Cloud
     if (subject != null)
       params.put("subject", subject);
     
-    return Helper.executeMethod(driver, COMMAND_GATEWAY_EMAIL, params);
+    return perfectoDriver.executor.executeMethod(COMMAND_GATEWAY_EMAIL, params);
   }
 
 
-  public Boolean SendEmailToUser(String userEmail, String body)
+  public Boolean sendEmailToUser(String userEmail, String body)
   {
-    return SendEmailToUser(userEmail, body, null);
+    return sendEmailToUser(userEmail, body, null);
   }
 
 
-  public Boolean SendEmailToUser(String userEmail)
+  public Boolean sendEmailToUser(String userEmail)
   {
-    return SendEmailToUser(userEmail, null, null);
+    return sendEmailToUser(userEmail, null, null);
   }
 
 
@@ -257,7 +276,7 @@ public class Cloud
    * @param subject The message subject for this command. <default is "none">
    * @return
    */
-  public Boolean SendEmailToCurrentUser(String body, String subject)
+  public Boolean sendEmailToCurrentUser(String body, String subject)
   {
     Map<String, Object> params = new HashMap<>();
     
@@ -269,7 +288,7 @@ public class Cloud
     if (subject != null)
       params.put("subject", subject);
     
-    return Helper.executeMethod(driver, COMMAND_GATEWAY_EMAIL, params);
+    return perfectoDriver.executor.executeMethod(COMMAND_GATEWAY_EMAIL, params);
   }
 
   /**
@@ -277,9 +296,9 @@ public class Cloud
    * @param body The message text for this command. Subject defaults to "none"
    * @return
    */
-  public Boolean SendEmailToCurrentUser(String body)
+  public Boolean sendEmailToCurrentUser(String body)
   {
-    return SendEmailToCurrentUser(body, null);
+    return sendEmailToCurrentUser(body, null);
   }
 
   /**
@@ -287,8 +306,8 @@ public class Cloud
    * Body and subject defaults to "none"
    * @return
    */
-  public Boolean SendEmailToCurrentUser()
+  public Boolean sendEmailToCurrentUser()
   {
-    return SendEmailToCurrentUser(null, null);
+    return sendEmailToCurrentUser(null, null);
   }
 }

@@ -1,15 +1,11 @@
 package g.perfecto.utilities;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openqa.selenium.remote.RemoteWebDriver;
-
-import io.appium.java_client.AppiumDriver;
 
 public class Audio
 {
@@ -39,8 +35,7 @@ public class Audio
 	public Integer confidence;
 	public List<String> phrases;
 	
-	private Map<String, Object> params = new HashMap<>();
-	private AppiumDriver driver;
+	private PerfectoDriver perfectoDriver;
 	
 	private static final String COMMAND_INJECT_AUDIO = "mobile:audio:inject";
 	private static final String COMMAND_AUDIO_RECORDING_START = "mobile:audio.recording:start";
@@ -50,14 +45,14 @@ public class Audio
 	private static final String COMMAND_AUDIO_VALIDATION = "mobile:audio:validation";
 	private static final String COMMAND_AUDIO_TEXT_VALIDATION = "mobile:audio-text:validation";
 	private static final String COMMAND_AUDIO_TO_TEXT = "mobile:audio:text";
-	private Log log = LogFactory.getLog(Audio.class);
+	private Log log;
 	
-	public Audio(AppiumDriver driver)
+	public Audio(PerfectoDriver driver)
 	{
-	  log.debug("Creating Audio object");
-		this.driver = driver;
-	}
-	
+	  log = LogFactory.getLog(this.getClass());
+    log.debug("Creating " + this.getClass() + " object");
+    perfectoDriver = driver;
+	}	
 
 	/**
 	 * Command starts recording the audio output from the device and creates a WAV file. The file is saved in the media storage server. 
@@ -65,7 +60,7 @@ public class Audio
 	 */
 	public String startRecording()
 	{
-		return Helper.executeMethodString(driver, COMMAND_AUDIO_RECORDING_START, new HashMap<String, Object>());
+		return perfectoDriver.executor.executeMethodString(COMMAND_AUDIO_RECORDING_START, new HashMap<String, Object>());
 	}
 
 	/**
@@ -74,7 +69,7 @@ public class Audio
 	 */
 	public String stopRecording()
 	{
-		return Helper.executeMethodString(driver, COMMAND_AUDIO_RECORDING_STOP, new HashMap<String, Object>());
+		return perfectoDriver.executor.executeMethodString(COMMAND_AUDIO_RECORDING_STOP, new HashMap<String, Object>());
 	}
 	
 	/**
@@ -108,14 +103,14 @@ public class Audio
 		if (wait != null)
 			params.put("wait", "wait");
 		
-		return Helper.executeMethod(driver, COMMAND_INJECT_AUDIO, params);
+		return perfectoDriver.executor.executeMethod(COMMAND_INJECT_AUDIO, params);
 	}
 	
 	public Boolean voiceAssistantInject(String text)
 	{
 	  Map<String, Object> params = new HashMap<>();
 		params.put("text", text);
-		return Helper.executeMethod(driver, COMMAND_VOICE_ASSIST, params);
+		return perfectoDriver.executor.executeMethod(COMMAND_VOICE_ASSIST, params);
 	}
 	
 	/**
@@ -189,7 +184,7 @@ public class Audio
 		if (profile != null && !profile.isEmpty())
 			params.put("profile", profile);
 		
-		return Helper.executeMethodString(driver, COMMAND_AUDIO_TO_TEXT, params);
+		return perfectoDriver.executor.executeMethodString(COMMAND_AUDIO_TO_TEXT, params);
 	}
 	
 	
@@ -250,7 +245,7 @@ public class Audio
 		if (isFemale != null)
 			params.put("gender", isFemale ? "female" : "male");
 		
-		return Helper.executeMethodString(driver, COMMAND_TEXTTO_AUDIO, params);
+		return perfectoDriver.executor.executeMethodString(COMMAND_TEXTTO_AUDIO, params);
 		
 	}
 	
@@ -369,7 +364,7 @@ public class Audio
 		if (calibration != null)
 			params.put("generic", generic);
 		
-		return Helper.executeMethodString(driver, COMMAND_AUDIO_VALIDATION, params);
+		return perfectoDriver.executor.executeMethodString(COMMAND_AUDIO_VALIDATION, params);
 	}
 	
 	
@@ -597,6 +592,6 @@ public class Audio
 		if (phrases != null)
 			params.put("phrase", phrases);
 		
-		return Helper.executeMethod(driver, COMMAND_AUDIO_TEXT_VALIDATION, params);
+		return perfectoDriver.executor.executeMethod(COMMAND_AUDIO_TEXT_VALIDATION, params);
 	}
 }

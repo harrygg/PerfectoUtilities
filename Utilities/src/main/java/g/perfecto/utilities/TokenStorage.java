@@ -7,18 +7,15 @@ import java.nio.file.Paths;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.openqa.selenium.remote.JsonException;
 
-import com.google.gson.JsonObject;
 
-public class Authenticator {
+public class TokenStorage {
   
-  public static Path tokensFilePath = Paths.get(System.getenv("HOMEPATH"), "perfectoTokens.json");
+  public static Path tokensFilePath = Paths.get(System.getenv("HOMEPATH"), "securityTokens.json");
   private static JSONObject tokensObj = null;
-  private static Log log = LogFactory.getLog(Authenticator.class);
+  private static Log log = LogFactory.getLog(TokenStorage.class);
   
   private static JSONObject getTokensObject() {
     try {
@@ -36,21 +33,14 @@ public class Authenticator {
     return tokensObj;
   }
 
-  public static String getTokenForCloud(String host) {
-    String token = null;
-    int count = 0;
-    JSONArray tokens = getTokensObject().getJSONArray("tokens");
-    for (int i = 0; i < tokens.length(); i++) {
-      JSONObject t = tokens.getJSONObject(i);
-      String key = t.keys().next();
-      if (key.equals(host)) {
-        log.debug("Found token for " + host + " cloud!");
-        token = t.getString(key);
-        count++;
-      }
-    }
-    if (count > 1)
-      log.warn("Multiple tokens found for cloud " + host);
+  public static String getTokenForCloud(String host) 
+  {
+    if (host.endsWith(".perfectomobile.com"))
+      host = host.replace(".perfectomobile.com", "");
+    
+    String token = getTokensObject().getJSONObject("tokens").getString(host);
+    log.debug("Found token for " + host + " cloud!");
+
     return token;
   }
 }

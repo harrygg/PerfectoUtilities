@@ -4,14 +4,10 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openqa.selenium.remote.RemoteWebDriver;
-
-import io.appium.java_client.AppiumDriver;
 
 public class Network {
 
-  private AppiumDriver driver = null;
-  private Map<String, Object> params = new HashMap<>();
+  private PerfectoDriver perfectoDriver;
   
   private final static String COMMAND_VNETWORK_START = "mobile:vnetwork:start";
   private final static String COMMAND_VNETWORK_STOP = "mobile:vnetwork:stop";
@@ -55,12 +51,13 @@ public class Network {
   public final static String PROFILE_4G_4G_LTE_ADVANCED_POOR = "4g_lte_advanced_poor";
   public final static String PROFILE_BANDWIDTH_GOOD = "bandwidth_good";
 
-  private Log log = LogFactory.getLog(Network.class);
+  private Log log;
   
-  public Network(AppiumDriver driver) 
+  public Network(PerfectoDriver driver) 
   {
-    Logger.LogDebug("Creating Network object");
-    this.driver = driver;
+    log = LogFactory.getLog(this.getClass());
+    log.debug("Creating " + this.getClass() + " object");
+    perfectoDriver = driver;
   }
 
   public Boolean enableWiFi()
@@ -116,23 +113,26 @@ public class Network {
   {
     Map<String, Object> params = new HashMap<>();
     params.put(property, enable ? "enabled" : "disabled");
-    return Helper.executeMethod(driver, COMMAND_SET_NETWORK_SETTINGS, params);
+    return perfectoDriver.executor.executeMethod(COMMAND_SET_NETWORK_SETTINGS, params);
   }
 
   private Boolean getNetworkSetting(String property)
   {
     Map<String, Object> params = new HashMap<>();
     params.put("property", property);
-    return Helper.executeMethod(driver, COMMAND_GET_NETWORK_SETTINGS, params);
+    return perfectoDriver.executor.executeMethod(COMMAND_GET_NETWORK_SETTINGS, params);
   }
 
+  public Boolean isVirtualizationEnabled = false;
+  
   /**
    * Starts network virtualization
    * @return
    */
   public Boolean startVirtualization()
   {
-    return Helper.executeMethod(driver, COMMAND_VNETWORK_START, createParametersMap());
+    isVirtualizationEnabled = true;
+    return perfectoDriver.executor.executeMethod(COMMAND_VNETWORK_START, createParametersMap());
   }
 
   public Boolean startVirtualization(Boolean generateHarFile)
@@ -145,8 +145,9 @@ public class Network {
   {
     Map<String, Object> params = new HashMap<>();
     if (generateHarFile)
-      params.put("generateHarFile", "true");
-    return Helper.executeMethod(driver, COMMAND_VNETWORK_STOP, params);
+      params.put("pcapFile", "true");
+    isVirtualizationEnabled = false;
+    return perfectoDriver.executor.executeMethod(COMMAND_VNETWORK_STOP, params);
   }
 
   /**
@@ -161,7 +162,7 @@ public class Network {
   
   public Boolean updateVirtualization()
   {
-    return Helper.executeMethod(driver, COMMAND_VNETWORK_UPDATE, createParametersMap());
+    return perfectoDriver.executor.executeMethod(COMMAND_VNETWORK_UPDATE, createParametersMap());
   }
 
   private Map<String, Object> createParametersMap()
@@ -169,7 +170,7 @@ public class Network {
     Map<String, Object> params = new HashMap<>();
     
     if (generateHarFile != null)
-      params.put("pcapFile", String.valueOf(generateHarFile));
+      params.put("generateHarFile", generateHarFile);
     
     if (latency != null)
       params.put("latency", latency);

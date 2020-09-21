@@ -1,24 +1,22 @@
 package g.perfecto.utilities;
 import java.io.File;
-import java.lang.reflect.Array;
-import java.util.Arrays;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.remote.RemoteWebDriver;
-
-import io.appium.java_client.AppiumDriver;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 public class Device {
 
-  private AppiumDriver driver = null;
-  
-  public String target;
+  private PerfectoDriver perfectoDriver;
 
+  public String target;
   public Integer tail;
   public String operation;
   public static final String ROTATE_OPERATION_RESET = "reset";
@@ -30,17 +28,6 @@ public class Device {
   public static final String ROTATE_METHOD_DEVICE = "device";
   public static final String ROTATE_METHOD_VIEW = "view";
   public Integer timeout;
-
-  private final static String COMMAND_MOBILE_READY = "mobile:handset:ready";
-  private final static String COMMAND_REBOOT = "mobile:handset:reboot";
-  private final static String COMMAND_RECOVER = "mobile:handset:recover";
-  private final static String COMMAND_GETLOG = "mobile:device:log";
-  private final static String COMMAND_ROTATE = "mobile:device:rotate";
-  private final static String COMMAND_LOCK = "mobile:screen:lock";
-  private final static String COMMAND_DEVICE_INFO = "mobile:device:info";
-  private final static String COMMAND_SET_LOCATION = "mobile:location:set";
-  private final static String COMMAND_GET_LOCATION = "mobile:location:get";
-  private final static String COMMAND_RESET_LOCATION = "mobile:location:reset";
 
   public static final String AUDIO_LANGUAGE_ENGLISH_US = "us-english";
   public static final String AUDIO_LANGUAGE_ENGLISH_UK = "uk-english";
@@ -74,12 +61,41 @@ public class Device {
   public static final String AUDIO_MATCH_MODE_LAST = "last";
   public static final String AUDIO_MATCH_MODE_INDEX = "index";
   
-  private Log log = LogFactory.getLog(Device.class);
+  public static final String SOURCE_SCREENSHOT_PRIMARY = "primary";
+  public static final String SOURCE_SCREENSHOT_CAMERA = "camera";
+  public static final String SOURCE_SCREENSHOT_BEST = "best";
+  public static final String SOURCE_SCREENSHOT_SECONDARY = "secondary";
+  public static final String SOURCE_SCREENSHOT_HIGHRESOLUTION = "high_res";
+
+  public static final String FORMAT_SCREENSHOT_PNG = "png";
+  public static final String FORMAT_SCREENSHOT_JPG = "jpg";
+  public static final String FORMAT_SCREENSHOT_BMP = "bmp";
+
+  private final static String COMMAND_MOBILE_READY = "mobile:handset:ready";
+  private final static String COMMAND_REBOOT = "mobile:handset:reboot";
+  private final static String COMMAND_RECOVER = "mobile:handset:recover";
+  private final static String COMMAND_GETLOG = "mobile:device:log";
+  private final static String COMMAND_START_DEBUG_LOGGING = "mobile:logs:start";
+  private final static String COMMAND_STOP_DEBUG_LOGGING = "mobile:logs:stop";
+  private final static String COMMAND_ROTATE = "mobile:device:rotate";
+  private final static String COMMAND_LOCK = "mobile:screen:lock";
+  private final static String COMMAND_DEVICE_INFO = "mobile:device:info";
+  private final static String COMMAND_SET_LOCATION = "mobile:location:set";
+  private final static String COMMAND_GET_LOCATION = "mobile:location:get";
+  private final static String COMMAND_RESET_LOCATION = "mobile:location:reset";
+  private final static String COMMAND_PUT_FILE = "mobile:media:put";
+  private final static String COMMAND_GET_FILE = "mobile:media:get";
+  private final static String COMMAND_DELETE_FILE = "mobile:media:delete";
+  private final static String COMMAND_DOWNLOAD_FILE = "perfecto:file:download";
+  private final static String COMMAND_SCREEN_IMAGE = "mobile:screen:image";
   
-  public Device(AppiumDriver driver)
+  private Log log;
+  
+  public Device(PerfectoDriver driver)
   {
-    Logger.LogDebug("Creating Device object");
-    this.driver = driver;
+    perfectoDriver = driver;
+    log = LogFactory.getLog(this.getClass());
+    log.debug("Creating " + this.getClass() + " object");
   }
 
   /**
@@ -92,9 +108,9 @@ public class Device {
     Map<String, Object> params = new HashMap<>();
 
     if (target != null)
-      params.put("target", this.target);
+      params.put("target", target);
 
-    return Helper.executeMethod(driver, COMMAND_MOBILE_READY, params);
+    return perfectoDriver.executor.executeMethod(COMMAND_MOBILE_READY, params);
   }
 
   /**
@@ -108,6 +124,12 @@ public class Device {
     this.target = target;
     return ready();
   }
+  
+  
+  public void home()
+  {
+    ready("all");
+  }
 
   /**
    * Reboots the device and returns it to the unlocked state. Performed by software reset for Android and iOS devices.
@@ -115,7 +137,7 @@ public class Device {
    */
   public Boolean reboot()
   {
-    return Helper.executeMethod(driver, COMMAND_REBOOT, new HashMap<>());
+    return perfectoDriver.executor.executeMethod(COMMAND_REBOOT, new HashMap<>());
   }
 
 
@@ -125,7 +147,7 @@ public class Device {
    */
   public Boolean recover()
   {
-    return Helper.executeMethod(driver, COMMAND_RECOVER, new HashMap<>());
+    return perfectoDriver.executor.executeMethod(COMMAND_RECOVER, new HashMap<>());
   }
 
   /**
@@ -137,7 +159,7 @@ public class Device {
     Map<String, Object> params = new HashMap<>();
     if (tail != null)
       params.put("tail", tail);
-    return Helper.executeMethodString(driver, COMMAND_GETLOG, params);
+    return perfectoDriver.executor.executeMethodString(COMMAND_GETLOG, params);
   }
 
   /**
@@ -146,12 +168,65 @@ public class Device {
    * Effective values are in the range of 0-1000
    * @return Device log returned as String
    */
-  public String getLog(int tail)
+  public String getLog(Integer numberOfLines)
   {
-    this.tail = tail;
+    tail = numberOfLines;
     return getLog();
   }
 
+  public void saveLog() 
+  {
+    saveLog(null, null);
+  }
+  
+  public void saveLog(Integer numberOfLines) 
+  {
+    saveLog(null, numberOfLines);
+  }
+  
+  public void saveLog(String filePath) 
+  {
+    saveLog(filePath, null);
+  }
+  
+  public void saveLog(String filePath, Integer numberOfLines) 
+  {
+    
+    File file;    
+    String content;
+    
+    try {
+      
+      content = getLog(numberOfLines);
+      
+      if (filePath != null && !filePath.isEmpty())
+        file = new File(filePath);
+      else
+        file = new File(perfectoDriver.driver.getCapabilities().getCapability("devivceName") + "-syslog.txt");
+      
+      log.info("Saving device log to " + filePath);
+      Files.write( Paths.get(filePath), content.getBytes());
+//      PrintWriter writer = new PrintWriter(file);
+//      writer.print(content);
+//      writer.close();
+    } 
+    catch (Exception e) 
+    {
+      e.printStackTrace();
+    }
+  }
+  
+  
+  public void startDebugLogging()
+  {
+    perfectoDriver.executor.tryExecuteMethod(COMMAND_START_DEBUG_LOGGING);
+  }
+  
+  public void stopDebugLogging()
+  {
+    perfectoDriver.executor.tryExecuteMethod(COMMAND_STOP_DEBUG_LOGGING);
+  }
+  
   /**
    * Rotates the device to either landscape or portrait.
    * @return
@@ -175,7 +250,7 @@ public class Device {
     else
       log.warn("Unsupported method value '" + method + "'. Possible values are: " + ROTATE_METHOD_DEVICE + " or " + ROTATE_METHOD_VIEW);
 
-    return Helper.executeMethod(driver, COMMAND_ROTATE, params);
+    return perfectoDriver.executor.executeMethod(COMMAND_ROTATE, params);
   }
 
   /**
@@ -185,19 +260,19 @@ public class Device {
   public Boolean resetOrientation()
   {
     Map<String, Object> params = new HashMap<>();
-    params.put("orientation", ROTATE_OPERATION_RESET);
-    return Helper.executeMethod(driver, COMMAND_ROTATE, params);
+    params.put("operation", ROTATE_OPERATION_RESET);
+    return perfectoDriver.executor.executeMethod(COMMAND_ROTATE, params);
   }
 
   /**
    * rotate the device to its next state
    * @return
    */
-  public Boolean rotateNext()
+  public void rotateNext()
   {
     Map<String, Object> params = new HashMap<>();
-    params.put("orientation", ROTATE_OPERATION_NEXT);
-    return Helper.executeMethod(driver, COMMAND_ROTATE, params);
+    params.put("operation", ROTATE_OPERATION_NEXT);
+    perfectoDriver.executor.executeMethod(COMMAND_ROTATE, params);
   }
 
   /**
@@ -205,13 +280,23 @@ public class Device {
    * @param method The rotation method. device | view
    * @return
    */
-  public Boolean rotateNext(String method)
+  public void rotateNext(String method)
   {
     if (method == ROTATE_METHOD_DEVICE || method == ROTATE_METHOD_VIEW)
       this.method = method;
-    return rotateNext();
+    rotateNext();
   }
 
+  public void rotateNext(Integer x)
+  {
+    while (x != 0)
+    {
+      rotateNext();
+      x--;
+      new UserActions(perfectoDriver).wait(3);
+    }
+  }
+  
   /**
    * rotates the device to portrait mode.
    * @return
@@ -220,7 +305,7 @@ public class Device {
   {
     Map<String, Object> params = new HashMap<>();
     params.put("state", ROTATE_STATE_PORTRAIT);
-    return Helper.executeMethod(driver, COMMAND_ROTATE, params);
+    return perfectoDriver.executor.executeMethod(COMMAND_ROTATE, params);
   }
 
   /**
@@ -241,17 +326,18 @@ public class Device {
   public Boolean rotateToLandscape()
   {
     Map<String, Object> params = new HashMap<>();
+    if (method == null)
+      method = ROTATE_METHOD_DEVICE;
     params.put("state", ROTATE_STATE_LANDSCAPE);
-    return Helper.executeMethod(driver, COMMAND_ROTATE, params);
+    return perfectoDriver.executor.executeMethod(COMMAND_ROTATE, params);
   }
   
   /**
    * Rotates device to landscape mode
    * @return
    */
-  public Boolean rotateToLandscape(String method) {
-    if (method == ROTATE_METHOD_DEVICE || method == ROTATE_METHOD_VIEW)
-      this.method = method;
+  public Boolean rotateViewToLandscape() {
+    method = ROTATE_METHOD_VIEW;
     return rotateToLandscape();
   }
 
@@ -266,7 +352,7 @@ public class Device {
     if (timeout != null)
       params.put("timeout", timeout);
 
-    return Helper.executeMethod(driver, COMMAND_LOCK, params);
+    return perfectoDriver.executor.executeMethod(COMMAND_LOCK, params);
   }
 
   /**
@@ -416,7 +502,7 @@ public class Device {
    */
   public String getLocation()
   {
-    return Helper.executeMethodString(driver, COMMAND_GET_LOCATION, new HashMap<String, Object>());
+    return perfectoDriver.executor.executeMethodString(COMMAND_GET_LOCATION, new HashMap<String, Object>());
   }
 
   /**
@@ -429,7 +515,7 @@ public class Device {
   {
     Map<String, Object> params = new HashMap<>();
     params.put("coordinates", coordinates);
-    return Helper.executeMethod(driver, COMMAND_SET_LOCATION, params);
+    return perfectoDriver.executor.executeMethod(COMMAND_SET_LOCATION, params);
   }
 
   /**
@@ -442,7 +528,7 @@ public class Device {
   {
     Map<String, Object> params = new HashMap<>();
     params.put("address", address);
-    return Helper.executeMethod(driver, COMMAND_SET_LOCATION, params);
+    return perfectoDriver.executor.executeMethod(COMMAND_SET_LOCATION, params);
   }
 
   /**
@@ -451,7 +537,7 @@ public class Device {
    */
   public Boolean resetLocation()
   {
-    return Helper.executeMethod(driver, COMMAND_RESET_LOCATION, new HashMap<String, Object>());
+    return perfectoDriver.executor.executeMethod(COMMAND_RESET_LOCATION, new HashMap<String, Object>());
   }
 
   /**
@@ -463,7 +549,7 @@ public class Device {
   {
     Map<String, Object> params = new HashMap<>();
     params.put("property", param);
-    return Helper.executeMethodString(driver, COMMAND_DEVICE_INFO, params);
+    return perfectoDriver.executor.executeMethodString(COMMAND_DEVICE_INFO, params);
   }
 
   /**
@@ -478,7 +564,7 @@ public class Device {
    */
   public String audioToText(String pathToAudio, String language, String phrase, String rate, String profile)
   {
-    Audio au = new Audio(driver);
+    Audio au = new Audio(perfectoDriver);
     return au.toText(pathToAudio, language, phrase, rate, profile);		
   }
 
@@ -513,7 +599,7 @@ public class Device {
    */
   public String textToAudio(String text, String repositoryFile, String language, Boolean isFemale)
   {
-    Audio au = new Audio(driver);
+    Audio au = new Audio(perfectoDriver);
     return au.fromText(text, repositoryFile, language, isFemale);
   }
 
@@ -542,7 +628,7 @@ public class Device {
    */
   public String validateAudio(String deviceAudio, String repositoryKey, Double treshold, String profile, String silenceTrimmingType, Double silenceTrimmingLevel, String calibration, String generic)
   {
-    Audio au = new Audio(driver);
+    Audio au = new Audio(perfectoDriver);
     return au.validateAudio(deviceAudio, repositoryKey, treshold, profile, silenceTrimmingType, silenceTrimmingLevel, calibration, generic);
   }
 
@@ -584,7 +670,7 @@ public class Device {
    */
   public Boolean injectAudio(String key, Boolean wait)
   {
-    Audio au = new Audio(driver);
+    Audio au = new Audio(perfectoDriver);
     return au.inject(key, wait);
   }
 
@@ -605,7 +691,7 @@ public class Device {
    */
   public String startAudioRecording()
   {
-    return new Audio(driver).startRecording();
+    return new Audio(perfectoDriver).startRecording();
   }
 
   /**
@@ -614,7 +700,7 @@ public class Device {
    */
   public String stopAudioRecording()
   {
-    return new Audio(driver).stopRecording();
+    return new Audio(perfectoDriver).stopRecording();
   }
 
   /**
@@ -638,7 +724,7 @@ public class Device {
    */
   public Boolean validateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words, String exact, Double threshold, Integer confidence, String language, String rate, String profile, List<String> phrases)
   {
-    return new Audio(driver).validateAudioToText(content, audioInput, target, match, index, words, exact, threshold, confidence, language);
+    return new Audio(perfectoDriver).validateAudioToText(content, audioInput, target, match, index, words, exact, threshold, confidence, language);
   }
 
   public Boolean validateAudioToText(String content, String audioInput, String target, String match, Integer index, Boolean words, String exact, Double threshold, Integer confidence, String language, String rate, String profile)
@@ -698,7 +784,7 @@ public class Device {
 
   public Boolean voiceAssistantInject(String text)
   {
-    return new Audio(driver).voiceAssistantInject(text);
+    return new Audio(perfectoDriver).voiceAssistantInject(text);
   }
 
   /**
@@ -707,7 +793,7 @@ public class Device {
    */
   public String getScreenshot()
   {
-    return new UserActions(driver).takeScreenshot();
+    return new UserActions(perfectoDriver).takeScreenshot();
   }
     
   /**
@@ -716,7 +802,7 @@ public class Device {
    */
   public String getScreenshotAsBase64()
   {
-    return new UserActions(driver).takeScreenshot();
+    return new UserActions(perfectoDriver).takeScreenshot();
   }
   
  
@@ -726,7 +812,7 @@ public class Device {
    */
   public File getScreenshotAsFile()
   {
-    return new UserActions(driver).takeScreenshotAsFile();
+    return new UserActions(perfectoDriver).takeScreenshotAsFile();
   }
   
   /**
@@ -735,7 +821,146 @@ public class Device {
    */
   public byte[] getScreenshotAsBytes()
   {
-    return new UserActions(driver).takeScreenshotAsBytes();
+    return new UserActions(perfectoDriver).takeScreenshotAsBytes();
   }
   
+
+
+  public void saveScreenshot(String path, String source, String format, String reportResolution, String label)
+  {
+    Map<String, Object> params = new HashMap<>();
+    params.put("key", path);
+    if (source != null)
+      params.put("source", source);
+    params.put("format", format == null ? "png" : format);
+    if (reportResolution != null)
+      params.put("report.resolution", reportResolution);
+    if (label != null)
+      params.put("label", label);
+    
+    perfectoDriver.executor.tryExecuteMethod(COMMAND_SCREEN_IMAGE, params);
+  }
+
+  public void saveScreenshot(String path, String source, String format, String reportResolution)
+  {
+    saveScreenshot(path, source, format, reportResolution, null);
+  }
+  
+  public void saveScreenshot(String path, String source, String format)
+  {
+    saveScreenshot(path, source, format, null, null);
+  }
+  
+  public void saveScreenshot(String path, String source)
+  {
+    saveScreenshot(path, source, null, null, null);
+  }
+
+  public void saveScreenshot(String path)
+  {
+    saveScreenshot(path, null, null, null, null);
+  }
+  
+  public Boolean enableWifi()
+  {
+    return new Network(perfectoDriver).enableWiFi();
+  }
+
+  public Boolean disableWifi()
+  {
+    return new Network(perfectoDriver).disableWiFi();
+  }
+
+  public Boolean disableWifiIOS() 
+  {
+    Application app = new Application(perfectoDriver, "com.apple.Preferences");
+    UserActions ua = new UserActions(perfectoDriver);
+
+    try {
+      app.restart();
+      WebElement el = ua.waitForElementByLabel("Wi-Fi");
+      if (el.getText().equals("Off"))
+      {
+        log.info("Wi-Fi already disabled.");
+        return true;
+      }
+      else
+      {
+        ua.clickOnElement(el);
+        el = ua.waitForElement(By.xpath("//*[@label='Wi-Fi' and @value='1']"));
+        ua.clickOnElement(el);
+        ua.wait(1);
+        if (ua.elementExists("//*[@label='Wi-Fi' and @value='0']"))
+        {
+          log.info("Wi-Fi disabled.");
+          return true;
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    } 
+    finally
+    {
+      app.stop();
+    }
+    log.info("Wi-Fi NOT disabled.");
+    return false;
+  }
+
+  public void enableWifiIOS() {
+    try {
+      UserActions ua = new UserActions(perfectoDriver);
+      Application app = new Application(perfectoDriver, "com.apple.Preferences");
+      app.restart();
+      WebElement el = ua.waitForElementByLabel("Wi-Fi");
+      if (!el.getText().equals("Off"))
+      {
+        log.info("Wi-Fi already enabled.");
+        return;
+      }
+      else
+      {
+        ua.clickOnElement(el);
+        el = ua.waitForElement(By.xpath("//*[@label='Wi-Fi' and @value='0']"));
+        ua.clickOnElement(el);
+        ua.wait(1);
+        log.info("Wi-Fi enabled.");
+      }
+      app.stop();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  /**
+   * Copies a file from the repository to the device file system. 
+   * Within iOS applications, you can use this command to place a file in any of the following folders as well: 
+   * Documents, Library, tmp. This is supported for both interactive and automation testing.
+   * @param repositoryFile - The full repository path, including directory and file name, where the file is located.
+   * Example - PRIVATE:dir1/dir2/name.jpg
+   * @param handsetFile - The device file path, including root and file name, where to upload the file. 
+   * The root can be phone or card. Example - "phone:/images/myImage.jpg"
+   */
+  public void putFile(String repositoryFile, String handsetFile) 
+  {
+    Map<String, Object> params = new HashMap<>();
+    params.put("repositoryFile", repositoryFile);
+    params.put("handsetFile", handsetFile);
+    perfectoDriver.executor.executeMethod(COMMAND_PUT_FILE, params);
+  }
+  
+  /**
+   * Copies a file from the device into the repository
+   * @param handsetFile - The device file path, including root and file name, where the file is located.
+   * The root can be phone or card. Example - "phone:/images/myImage.jpg"
+   * @param repositoryFile - The full repository path, including directory and file name, where to save the file.
+   */
+  public void getFile(String handsetFile, String repositoryFile) 
+  {
+    Map<String, Object> params = new HashMap<>();
+    params.put("repositoryFile", repositoryFile);
+    params.put("handsetFile", handsetFile);
+    perfectoDriver.executor.executeMethod(COMMAND_PUT_FILE, params);
+  }
+
 }

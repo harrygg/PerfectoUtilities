@@ -1,4 +1,7 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  
   <modelVersion>4.0.0</modelVersion>
   <groupId>g.perfecto</groupId>
   <artifactId>utilities</artifactId>
@@ -7,9 +10,20 @@
   
 	<properties>
      <reportium-sdk.version>2.3.1</reportium-sdk.version>
+     <selenium.version>3.6.0</selenium.version>
+     <appium.version>5.0.4</appium.version>
 	</properties>
 
   <repositories>
+    <repository>
+      <id>central</id>
+      <name>Central Repository</name>
+      <url>https://repo.maven.apache.org/maven2</url> 
+      <layout>default</layout>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
     <repository>
         <id>perfectomobile</id>
         <name>Perfecto mobile</name>
@@ -17,23 +31,27 @@
     </repository>
   </repositories>
   <dependencies>
-
-    
-  	<dependency>
+    <dependency>
+        <groupId>org.seleniumhq.selenium</groupId>
+        <artifactId>selenium-java</artifactId>
+        <version>${selenium.version}</version>
+    </dependency> 
+    <dependency>
+      <groupId>org.seleniumhq.selenium</groupId>
+      <artifactId>selenium-remote-driver</artifactId>
+      <version>${selenium.version}</version>
+    </dependency>
+  	<!-- dependency>
   		<groupId>org.seleniumhq.selenium</groupId>
   		<artifactId>selenium-api</artifactId>
   		<version>3.6.0</version>
   	</dependency>
-  	  	<dependency>
-  		<groupId>org.seleniumhq.selenium</groupId>
-  		<artifactId>selenium-remote-driver</artifactId>
-  		<version>3.6.0</version>
-  	</dependency>
+
   	  	<dependency>
   		<groupId>org.seleniumhq.selenium</groupId>
   		<artifactId>selenium-support</artifactId>
   		<version>3.6.0</version>
-  	</dependency>
+  	</dependency -->
   	<!-- https://mvnrepository.com/artifact/org.json/json -->
 		<dependency>
         <groupId>org.json</groupId>
@@ -48,14 +66,26 @@
         <exclusions>
           <exclusion>
              <groupId>org.seleniumhq.selenium</groupId>
+             <artifactId>selenium-remote-driver</artifactId>
+          </exclusion>
+          <exclusion>
+             <groupId>org.seleniumhq.selenium</groupId>
              <artifactId>selenium-api</artifactId>
           </exclusion>
+          <exclusion>
+             <groupId>org.seleniumhq.selenium</groupId>
+             <artifactId>selenium-support</artifactId>
+          </exclusion>  
+          <exclusion>
+             <groupId>org.seleniumhq.selenium</groupId>
+             <artifactId>selenium-java</artifactId>
+          </exclusion>                    
         </exclusions>
     </dependency>
     <dependency>
 	    <groupId>io.appium</groupId>
 	    <artifactId>java-client</artifactId>
-	    <version>7.3.0</version>
+	    <version>${appium.version}</version>
 		</dependency>
 		
 		<dependency>
@@ -63,18 +93,12 @@
       <artifactId>logback-access</artifactId>
       <version>1.2.3</version>
     </dependency>
-		<!-- https://mvnrepository.com/artifact/ch.qos.logback/classic -->
-		<dependency>
-		    <groupId>ch.qos.logback</groupId>
-		    <artifactId>classic</artifactId>
-		    <version>1.0.0</version>
-		</dependency>
-
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-core</artifactId>
       <version>1.2.3</version>
-    </dependency>
+    </dependency>   
+ 
   </dependencies>
   
   

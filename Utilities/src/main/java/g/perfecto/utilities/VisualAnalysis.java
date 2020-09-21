@@ -1,18 +1,14 @@
 package g.perfecto.utilities;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openqa.selenium.remote.RemoteWebDriver;
-
-import io.appium.java_client.AppiumDriver;
 
 public class VisualAnalysis {
 
-  private AppiumDriver driver;
+  private PerfectoDriver perfectoDriver;
   private Map<String, Object> params = new HashMap<>();
 
   public String label;
@@ -72,6 +68,10 @@ public class VisualAnalysis {
   public String screenLeft;
   public String screenWidth;
   public String match;
+  
+  public static final String MATCH_MODE_SAMESIZE = "identical";
+  public static final String MATCH_MODE_ANYSIZE = "similar";
+  public static final String MATCH_MODE_BOUNDED = "bounded";
   public String textMatch;
   public static final String TEXT_MATCH_CONTAIN = "contain";
   public static final String TEXT_MATCH_EQUAL = "equal";
@@ -178,15 +178,16 @@ public class VisualAnalysis {
   private final static String COMMAND_TEXT_FIND = "mobile:text:find";
   private final static String COMMAND_SCREENTEXT = "mobile:screen:text";
 
-  private Log log = LogFactory.getLog(VisualAnalysis.class);
+  private Log log;
   
-  public VisualAnalysis(AppiumDriver driver)
+  public VisualAnalysis(PerfectoDriver driver)
   {
-    log.debug("Creating VisualAnalysis object");
-    this.driver = driver;
+    perfectoDriver = driver;
+    log = LogFactory.getLog(this.getClass());
+    log.debug("Creating " + this.getClass() + " object");
   }
 
-  public void ResetParams()
+  public void resetParams()
   {
     params.clear();
     label = null;
@@ -257,7 +258,7 @@ public class VisualAnalysis {
       return null;
     setAdditionalParams();
 
-    return Helper.executeMethodString(driver, COMMAND_EDIT_IMAGE_GET, params);	
+    return perfectoDriver.executor.executeMethodString(COMMAND_EDIT_IMAGE_GET, params);	
   }
 
   /**
@@ -295,7 +296,7 @@ public class VisualAnalysis {
     params.put("text",  text);
     setAdditionalParams();
 
-    return Helper.executeMethod(driver, COMMAND_EDIT_IMAGE_SET, params);	
+    return perfectoDriver.executor.executeMethod(COMMAND_EDIT_IMAGE_SET, params);	
 
   }
 
@@ -336,7 +337,7 @@ public class VisualAnalysis {
       return null;
     setAdditionalParams();
 
-    return Helper.executeMethodString(driver, COMMAND_EDIT_TEXT_GET, params);	
+    return perfectoDriver.executor.executeMethodString(COMMAND_EDIT_TEXT_GET, params);	
   }
 
   /**
@@ -376,7 +377,7 @@ public class VisualAnalysis {
 
     setAdditionalParams();
 
-    return Helper.executeMethod(driver, COMMAND_EDIT_TEXT_SET, params);	
+    return perfectoDriver.executor.executeMethod(COMMAND_EDIT_TEXT_SET, params);	
   }
 
   /**
@@ -433,9 +434,15 @@ public class VisualAnalysis {
       return false;
     setAdditionalParams();
 
-    return Helper.executeMethod(driver, COMMAND_IMAGE_BUTTON_CLICK, params);	
+    return perfectoDriver.executor.executeMethod(COMMAND_IMAGE_BUTTON_CLICK, params);	
   }
 
+  public Boolean imageButtonClick(String label)
+  {
+    this.label = label;
+    return imageButtonClick();
+  }
+  
   /**
    * Identifies a button, based on a text label, and clicks on it.
    * @return
@@ -443,11 +450,10 @@ public class VisualAnalysis {
   public Boolean textButtonClick()
   {
     params.clear();
-    if (!addMandatoryParameter("label", label))
-      return false;
+    addMandatoryParameter("label", label);
     setAdditionalParams();
 
-    return Helper.executeMethod(driver, COMMAND_BUTTON_TEXT_CLICK, params);	
+    return perfectoDriver.executor.executeMethod(COMMAND_BUTTON_TEXT_CLICK, params);	
   }
 
   /**
@@ -496,7 +502,7 @@ public class VisualAnalysis {
       return false;
     setAdditionalParams();
 
-    return Helper.executeMethod(driver, COMMAND_IMAGE_SELECT, params);	
+    return perfectoDriver.executor.executeMethod(COMMAND_IMAGE_SELECT, params);	
   }
 
   /**
@@ -521,7 +527,7 @@ public class VisualAnalysis {
       return false;
     setAdditionalParams();
 
-    return Helper.executeMethod(driver, COMMAND_TEXT_SELECT, params);	
+    return perfectoDriver.executor.executeMethod(COMMAND_TEXT_SELECT, params);	
   }
 
   /**
@@ -548,13 +554,13 @@ public class VisualAnalysis {
    * @return
    */
   public Boolean imageCheckPoint()
-  {	
+  {
     params.clear();
     if (!addMandatoryParameter("content", content))
       return false;		
     setAdditionalParams();
 
-    return Helper.executeMethod(driver, COMMAND_CHECKPOINT_IMAGE, params);
+    return perfectoDriver.executor.executeMethod(COMMAND_CHECKPOINT_IMAGE, params);
   }
 
   /**
@@ -579,7 +585,7 @@ public class VisualAnalysis {
       return false;
     setAdditionalParams();
 
-    return Helper.executeMethod(driver, COMMAND_CHECKPOINT_TEXT, params);
+    return perfectoDriver.executor.executeMethod(COMMAND_CHECKPOINT_TEXT, params);
   }
 
   /**
@@ -655,7 +661,7 @@ public class VisualAnalysis {
       return false;
     setAdditionalParams();
 
-    return Helper.executeMethod(driver, methodName, params);
+    return perfectoDriver.executor.executeMethod(methodName, params);
   }
 
   /**
@@ -666,7 +672,7 @@ public class VisualAnalysis {
   {
     params.clear();
     setAdditionalParams();		
-    return Helper.executeMethodString(driver, COMMAND_SCREENTEXT, params);
+    return perfectoDriver.executor.executeMethodString(COMMAND_SCREENTEXT, params);
   }
 
   /**
@@ -697,14 +703,15 @@ public class VisualAnalysis {
   {
     if (parameterValue == null || parameterValue.trim().isEmpty())
     {
-      log.error("Missing mandatory parameter " + parameterName);
+      log.error("Missing mandatory parameter '" + parameterName + "'");
       return false;
     }
     params.put(parameterName, parameterValue);
     return true;
   }
 
-  private void setAdditionalParams() {
+  private void setAdditionalParams() 
+  {
 
     if (treshold != null)
       params.put("threshold", treshold);
@@ -754,7 +761,7 @@ public class VisualAnalysis {
     if (match != null)
       params.put("match", match);
 
-    if (textMatch != null) {
+    if (textMatch != null)
       params.put("match", textMatch);
      
     if (inverse != null)	
@@ -830,7 +837,7 @@ public class VisualAnalysis {
       params.put("context", context);
     
     if (scope != null)
-      params.put("scope", this.scope);
+      params.put("scope", scope);
     
     if (caps != null)
       params.put("caps", caps);
@@ -852,6 +859,5 @@ public class VisualAnalysis {
 
     if (measurement != null)
       params.put("measurement",  measurement);
-    }
   }
 }

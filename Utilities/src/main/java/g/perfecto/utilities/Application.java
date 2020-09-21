@@ -1,25 +1,24 @@
 package g.perfecto.utilities;
 
-import java.util.Arrays;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.openqa.selenium.remote.DriverCommand;
-import org.openqa.selenium.remote.RemoteExecuteMethod;
-import org.openqa.selenium.remote.RemoteWebDriver;
-
-import io.appium.java_client.AppiumDriver;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openqa.selenium.remote.DriverCommand;
+
 public class Application {
 
-  private AppiumDriver driver = null;
-  public String id = null;
-  public String name = null;
-  public String path = null;
-  public String app = null;
+  private PerfectoDriver perfectoDriver;
+  public String id;
+  public String name;
+  public String path;
+  public String localPath;
+  public String app;
 
   public Boolean instrument = false;
   public Boolean sensorInstrument = false;
@@ -27,10 +26,11 @@ public class Application {
   public Boolean resign = false;
   public Boolean reset = false;
   public Boolean instrumentResetKeychain = false;
-  public String adjustment = null;
-  public String activity = null;
+  public String adjustment;
+  public String activity;
   public int timeout = 20;
-
+  public String injectedImagePath;
+  
   public static final String CONTEXT_NATIVE = "NATIVE_APP";
   public static final String CONTEXT_WEB = "WEBVIEW";
   public static final String CONTEXT_VISUAL = "VISUAL";
@@ -45,69 +45,73 @@ public class Application {
   private final String COMMAND_UNINSTALL = "mobile:application:uninstall";
   private final String COMMAND_OPEN = "mobile:application:open";
   private final String COMMAND_CLOSE = "mobile:application:close";
-  private final String COMMAND_ACTIVITYOPEN = "mobile:activity:open";
-  private final String COMMAND_ACTIVITYSYNC = "mobile:activity:sync";
-  private final String COMMAND_DEVICEINFO = "mobile:device:info";
-  private final String COMMAND_IMAGEINJECTIONSTART = "mobile:image.injection:start";
-  private final String COMMAND_IMAGEINJECTIONSTOP = "mobile:image.injection:stop";
+  private final String COMMAND_ACTIVITY_OPEN = "mobile:activity:open";
+  private final String COMMAND_ACTIVITY_SYNC = "mobile:activity:sync";
+  private final String COMMAND_DEVICE_INFO = "mobile:device:info";
+  private final String COMMAND_IMAGE_INJECTION_START = "mobile:image.injection:start";
+  private final String COMMAND_IMAGE_INJECTION_STOP = "mobile:image.injection:stop";
   private final String COMMAND_SENSOR_AUTHENTICATE = "mobile:sensorAuthentication:set";
   private final String COMMAND_FINGERPRINT_AUTHENTICATE = "mobile:fingerprint:set";
-
+  private final String COMMAND_CHECK_ACCESSIBILITY_AUDIT = "mobile:checkAccessibility:audit";
+  
   private Log log;
   
-  public Application(AppiumDriver driver) {
-    this(driver, null, null, false, false);
-  }
-
-  public Application(AppiumDriver driver, String path) {
-    this(driver, path, null, false, false);
-  }
-
-  public Application(AppiumDriver driver, String path, String id) {
-    this(driver, path, id, false, false);
-  }
-
-  public Application(AppiumDriver driver, String path, String id, Boolean install) {
-    this(driver, path, id, install, false);
-  }
-
-  public Application(AppiumDriver driver, String path, String id, Boolean install, Boolean launch) 
+  public Application(PerfectoDriver parent)
   {
+    this.perfectoDriver = parent;
+    if (parent.capabilities.bundleId != null)
+      id = parent.capabilities.bundleId;
+    else if (parent.capabilities.appPackage != null)
+      id = parent.capabilities.appPackage;
+    
     log = LogFactory.getLog(this.getClass());
     log.debug("Creating Application object");
-    
-    this.driver = driver;
-    
-    if (path != null && !path.isEmpty())
-    {
-      log.debug("path=" + path);
-      this.path = path;      
-    }
-    
-    if (id != null && !id.isEmpty())
-    {
-      log.debug("id=" + id);
-      this.id = id;
-    }
-
-    if (install)
-      install();
-
-    if (launch)
-      start();
   }
 
+  
+  public Application(PerfectoDriver parent, String id)
+  {
+    this(parent);
+    this.id = id;
+  }
+  
   /**
-   * Install application. Its path and id must be set prior to calling this
+   * Install application. Its path must be set prior to calling this
    * method.
    * 
    * @return true on successful execution of the function
    */
-  public Boolean install() {
+  public Boolean install() 
+  {
+    return install(null);
+  }
+
+  /**
+   * Install and start application
+   * @param start - start app
+   */
+  
+  public void install(boolean start) 
+  {
+    install(null);
+    start();
+  }
+  
+  /**
+   * Install application.
+   * method.
+   * @param installPath
+   * @return
+   */
+  public Boolean install(String installPath) {
 
     Map<String, Object> params = new HashMap<>();
-
-    if (path == null || path.isEmpty()) {
+    
+    if (installPath != null && !installPath.isEmpty())
+      path = installPath;
+    
+    if (path == null || path.isEmpty()) 
+    {
       log.error("App path not provided!");
       return false;
     }
@@ -127,7 +131,18 @@ public class Application {
     if (instrumentResetKeychain)
       params.put("instrumentResetKeychain", "true");
 
-    return Helper.executeMethod(driver, COMMAND_INSTALL, params);
+    String res = perfectoDriver.executor.executeMethodString(COMMAND_INSTALL, params);
+    if (res != null)
+    {
+      // Fill out the id if it is missing
+      if (id == null || id.isEmpty())
+        id = res;
+      else
+        if (id != res)
+          log.warn("Returned app identifier is different than the specified one. " + id + " vs " + res);
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -147,7 +162,7 @@ public class Application {
     // If we don't have app id, use name
     if (id == null || id.isEmpty()) {
 
-      if (name != null && !id.isEmpty()) {
+      if (name != null && !name.isEmpty()) {
         type = "name";
         identifier = name;
       } else {
@@ -157,7 +172,7 @@ public class Application {
     }
     params.put(type, identifier);
 
-    return Helper.executeMethod(driver, COMMAND_UNINSTALL, params);
+    return perfectoDriver.executor.executeMethod(COMMAND_UNINSTALL, params);
   }
 
   /**
@@ -175,7 +190,7 @@ public class Application {
 
     // If we don't have app id, use name
     if (id == null || id.isEmpty()) {
-      if (name != null && !id.isEmpty()) {
+      if (name != null && !name.isEmpty()) {
         type = "name";
         identifier = name;
       } else {
@@ -187,8 +202,8 @@ public class Application {
     params.put(type, identifier);
     log.info("Starting app " + identifier + " identified by its " + type);
 
-    switchToNativeContext();
-    return Helper.executeMethod(driver, COMMAND_OPEN, params);
+//    switchToNativeContext();
+    return perfectoDriver.executor.executeMethod(COMMAND_OPEN, params);
   }
 
   /**
@@ -215,8 +230,9 @@ public class Application {
    */
   public Boolean openById(String id) {
     Map<String, Object> params = new HashMap<>();
+    this.id = id;
     params.put("identifier", id);
-    return Helper.executeMethod(driver, COMMAND_OPEN, params);
+    return perfectoDriver.executor.executeMethod(COMMAND_OPEN, params);
   }
 
   /**
@@ -227,8 +243,9 @@ public class Application {
    */
   public Boolean openByName(String name) {
     Map<String, Object> params = new HashMap<>();
+    this.name = name;
     params.put("name", name);
-    return Helper.executeMethod(driver, COMMAND_OPEN, params);
+    return perfectoDriver.executor.executeMethod(COMMAND_OPEN, params);
   }
 
   /**
@@ -275,7 +292,7 @@ public class Application {
     params.put(type, identifier);
     log.info("Closing app " + identifier + " identified by its " + type);
 
-    return Helper.executeMethod(driver, COMMAND_CLOSE, params);
+    return perfectoDriver.executor.tryExecuteMethod(COMMAND_CLOSE, params);
   }
 
   /**
@@ -301,7 +318,7 @@ public class Application {
   public Boolean closeById(String id) {
     Map<String, Object> params = new HashMap<>();
     params.put("identifier", id);
-    return Helper.executeMethod(driver, COMMAND_CLOSE, params);
+    return perfectoDriver.executor.executeMethod( COMMAND_CLOSE, params);
   }
 
   /**
@@ -313,7 +330,7 @@ public class Application {
   public Boolean closeByName(String name) {
     Map<String, Object> params = new HashMap<>();
     params.put("name", name);
-    return Helper.executeMethod(driver, COMMAND_CLOSE, params);
+    return perfectoDriver.executor.executeMethod(COMMAND_CLOSE, params);
   }
 
   /**
@@ -378,7 +395,7 @@ public class Application {
     Map<String, Object> params = new HashMap<>();
     params.put("package", id);
     params.put("activity", activityName);
-    return Helper.executeMethod(driver, COMMAND_ACTIVITYOPEN, params);
+    return perfectoDriver.executor.executeMethod(COMMAND_ACTIVITY_OPEN, params);
   }
 
   /**
@@ -389,7 +406,7 @@ public class Application {
   public String getCurrentActivity() {
     Map<String, Object> params = new HashMap<>();
     params.put("property", "currentActivity");
-    return Helper.executeMethodString(driver, COMMAND_DEVICEINFO, params);
+    return perfectoDriver.executor.executeMethodString(COMMAND_DEVICE_INFO, params);
   }
 
   /**
@@ -400,7 +417,7 @@ public class Application {
   public String getCurrentPackage() {
     Map<String, Object> params = new HashMap<>();
     params.put("property", "currentPackage");
-    return Helper.executeMethodString(driver, COMMAND_DEVICEINFO, params);
+    return perfectoDriver.executor.executeMethodString(COMMAND_DEVICE_INFO, params);
   }
 
   /**
@@ -424,7 +441,7 @@ public class Application {
     params.put("package", id);
     params.put("activity", activityName);
 
-    return Helper.executeMethod(driver, COMMAND_ACTIVITYSYNC, params);
+    return perfectoDriver.executor.executeMethod(COMMAND_ACTIVITY_SYNC, params);
   }
 
   public Boolean syncActivity(String activityName, int timeout) {
@@ -432,23 +449,17 @@ public class Application {
     return syncActivity(activityName);
   }
 
-  /**
-   * Start image injection for the current app. App id or name must be provided
-   * prior to calling this function. Uses ID or name.
-   * 
-   * @param repositoryFile
-   *          - path to the image in the repository to be injected
-   * @return
-   */
-  public Boolean startImageInjection(String repositoryFile) {
+
+  public Boolean startImageInjection()
+  {
     Map<String, Object> params = new HashMap<>();
 
-    if (repositoryFile.isEmpty()) {
+    if (injectedImagePath == null || injectedImagePath.isEmpty()) {
       log.error("No repositoryFile specified!");
       return false;
     }
 
-    params.put("repositoryFile", repositoryFile);
+    params.put("repositoryFile", injectedImagePath);
 
     if (adjustment != null)
       params.put("adjustment", adjustment);
@@ -463,7 +474,20 @@ public class Application {
       params.put("identifier", id);
     }
 
-    return Helper.executeMethod(driver, COMMAND_IMAGEINJECTIONSTART, params);
+    return perfectoDriver.executor.executeMethod(COMMAND_IMAGE_INJECTION_START, params);
+  }
+  
+  /**
+   * Start image injection for the current app. App id or name must be provided
+   * prior to calling this function. Uses ID or name.
+   * 
+   * @param repositoryFile
+   *          - path to the image in the repository to be injected
+   * @return
+   */
+  public Boolean startImageInjection(String repositoryFile) {
+    injectedImagePath = repositoryFile;
+    return startImageInjection();
   }
 
   /**
@@ -477,9 +501,12 @@ public class Application {
    */
   public Boolean startImageInjection(String repositoryFile, String id) {
     this.id = id;
-    return startImageInjection(repositoryFile);
+    injectedImagePath = repositoryFile;
+    return startImageInjection();
   }
 
+
+  
   /**
    * Inject image to an app identified by its name.
    * 
@@ -487,7 +514,7 @@ public class Application {
    * @param name
    * @return
    */
-  public Boolean StartImageInjectionByName(String repositoryFile, String name) {
+  public Boolean startImageInjectionByName(String repositoryFile, String name) {
     this.id = null;
     this.name = name;
     return startImageInjection(repositoryFile, name);
@@ -499,30 +526,25 @@ public class Application {
    * @return
    */
   public Boolean stopImageInjection() {
-    return Helper.executeMethod(driver, COMMAND_IMAGEINJECTIONSTOP, new HashMap<String, Object>());
+    return perfectoDriver.executor.executeMethod(COMMAND_IMAGE_INJECTION_STOP, new HashMap<String, Object>());
   }
-
+  
   /**
    * Switches to different context
    * 
    * @param context
    * @return
    */
-  public Boolean switchToContext(String context) {
-    if (!context.equalsIgnoreCase(CONTEXT_WEB) && !context.equalsIgnoreCase(CONTEXT_NATIVE)
-        && !context.equalsIgnoreCase(CONTEXT_VISUAL)) {
-      log.error("Unsupported context value: " + context);
-      return false;
-    }
-
-    RemoteExecuteMethod executeMethod = new RemoteExecuteMethod(driver);
+  public Boolean switchToContext(String context) 
+  {
     Map<String, String> params = new HashMap<String, String>();
     params.put("name", context);
 
     try {
       log.info("Switching to '" + context + "' context.");
-      executeMethod.execute(DriverCommand.SWITCH_TO_CONTEXT, params);
-    } catch (Exception e) {
+      perfectoDriver.executor.remoteExecute(DriverCommand.SWITCH_TO_CONTEXT, params);
+    }
+    catch (Exception e) {
       e.printStackTrace();
       return false;
     }
@@ -541,32 +563,36 @@ public class Application {
     return switchToContext(CONTEXT_VISUAL);
   }
 
-  public String getCurrentContextHandle() {
-    RemoteExecuteMethod executeMethod = new RemoteExecuteMethod(driver);
-    String context = (String) executeMethod.execute(DriverCommand.GET_CURRENT_CONTEXT_HANDLE, null);
+  public String getCurrentContextHandle() 
+  {
+    String context = (String) perfectoDriver.driver.getContext();//.executor.execute(DriverCommand.GET_CURRENT_CONTEXT_HANDLE);
     log.info("Current context: " + context);
     return context;
   }
 
-  public List<String> getContextHandles() {
-    RemoteExecuteMethod executeMethod = new RemoteExecuteMethod(driver);
-    List<String> contexts = (List<String>) executeMethod.execute(DriverCommand.GET_CONTEXT_HANDLES, null);
+  public List<String> getContextHandles() 
+  {
+    @SuppressWarnings("unchecked")
+    List<String> contexts = (List<String>) perfectoDriver.executor.remoteExecute(DriverCommand.GET_CONTEXT_HANDLES, null);
     log.info("List of available contexts: " + String.join(", ", contexts));
 
     return contexts;
   }
 
-  public Boolean startObjectOptimization(Integer maxChildNodes) {
+  public Boolean startObjectOptimization(Integer maxChildNodes) 
+  {
     Map<String, Object> params = new HashMap<>();
     params.put("children", maxChildNodes);
-    return Helper.executeMethod(driver, "mobile:objects.optimization:start", params);
+    return perfectoDriver.executor.executeMethod("mobile:objects.optimization:start", params);
   }
 
-  public Boolean stopObjectOptimization(Integer maxChildNodes) {
-    return Helper.executeMethod(driver, "mobile:objects.optimization:stop", new HashMap<String, Object>());
+  public Boolean stopObjectOptimization(Integer maxChildNodes) 
+  {
+    return perfectoDriver.executor.executeMethod("mobile:objects.optimization:stop", new HashMap<String, Object>());
   }
 
-  private Boolean authenticate(String authType, Boolean success, String errorType) {
+  private Boolean authenticate(String authType, Boolean success, String errorType) 
+  {
     Map<String, Object> params = new HashMap<>();
 
     // params = setAppIdOrName(params);
@@ -591,7 +617,7 @@ public class Application {
       params.put("errorType", errorType);
 
     String method = authType == "finger" ? COMMAND_FINGERPRINT_AUTHENTICATE : COMMAND_SENSOR_AUTHENTICATE;
-    return Helper.executeMethod(driver, method, params);
+    return perfectoDriver.executor.executeMethod(method, params);
   }
 
   public Boolean sensorAuthenticate(Boolean success, String errorType) {
@@ -617,4 +643,72 @@ public class Application {
   public Boolean fingerAuthenticateFail(String errorType) {
     return authenticate("finger", false, errorType);
   }
+
+  /**
+   * Uploads a local APK/IPA file to Perfecto repository.
+   * If repository path is not specified, uploads to PRIVATE folder
+   * @return
+   */
+  public Boolean upload()
+  {
+    if (localPath == null || localPath.isEmpty())
+    {
+      log.error("Local app path must be specified to upload a media");
+      return false;
+    }
+    
+    if (path == null || path.isEmpty())
+    {
+      Path filePath = Paths.get(localPath);
+      path = "PRIVATE:" + filePath.getFileName().toString();
+      log.error("Path argument was not set. Using: " + path);
+    }
+    return perfectoDriver.uploadMedia(localPath, path);
+  }
+  
+  /**
+   * Uploads a local APK/IPA file to Perfecto repository.
+   * @param localPath
+   * @return
+   */
+  public Boolean upload(String localPath)
+  {
+    this.localPath = localPath;
+    return upload();
+  }
+  
+  public Boolean upload(URL mediaURL) 
+  {
+    if (path == null || path.isEmpty())
+    {
+      Path filePath = Paths.get(mediaURL.toString());
+      path = "PRIVATE:" + filePath.getFileName().toString();
+      log.error("Path argument was not set. Using: " + path);
+    }
+    
+    return perfectoDriver.uploadMedia(mediaURL, path);
+  }
+  
+  public Boolean upload(String localPath, String repositoryKey)
+  {
+    return perfectoDriver.uploadMedia(localPath, repositoryKey);
+  }
+  
+  public Boolean upload(URL mediaURL, String repositoryKey) 
+  {
+    return perfectoDriver.uploadMedia(mediaURL, repositoryKey);
+  }
+  
+  /**
+   * 
+   * @param tag The tag that is appended to the name of the audit report to help match it to the application screen.
+   * @return
+   */
+  public void checkAccessibilityAudit(String tag)
+  {
+    Map<String, Object> params = new HashMap<>();
+    params.put("tag", tag);
+    perfectoDriver.executor.executeMethod(COMMAND_CHECK_ACCESSIBILITY_AUDIT, params);
+  }
+  
 }

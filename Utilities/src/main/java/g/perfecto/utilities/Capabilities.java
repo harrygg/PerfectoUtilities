@@ -13,13 +13,17 @@ public class Capabilities
 
   public String platformName;
   public String platformVersion;
+  public static final String WINDOWS_7 = "7";
+  public static final String WINDOWS_10 = "10";
+  
   public String deviceSessionId;
   public String browserName;
   public static final String BROWSER_NAME_SAFARI = "Safari";
+  public static final String BROWSER_NAME_MOBILE_SAFARI = "mobileSafari";
   public static final String BROWSER_NAME_CHROME = "Chrome";
-  public static final String BROWSER_NAME_MOBILEOS = "MobileOS";
-  public static final String BROWSER_NAME_MOBILEDEFAULT = "MobileDefault";
-  public static final String BROWSER_NAME_PERFECTOMOBILE = "PerfectoMobile";
+  public static final String BROWSER_NAME_MOBILE_CHROME = "mobileChrome";
+  public static final String BROWSER_NAME_MOBILE_OS = "mobileOS";
+  public static final String BROWSER_NAME_MOBILE_DEFAULT = "mobileDefault";
   public static final String BROWSER_NAME_FIREFOX = "Firefox";
   public static final String BROWSER_NAME_EDGE = "Edge";
   public static final String BROWSER_NAME_INTERNET_EXPLORER = "Internet Explorer";
@@ -30,14 +34,15 @@ public class Capabilities
   public static final String BROWSER_VERSION_LATEST_2 = "latest-2";
   public static final String BROWSER_VERSION_BETA = "beta";
 
+  public String safariInitialUrl;
   public Boolean takesScreenshot;
   public String screenshotFormat;
   public Boolean screenshotOnError;
   
-  public String automationName;
   public static final String AUTOMATION_NAME_PERFECTO = "Perfecto";
   public static final String AUTOMATION_NAME_APPIUM = "Appium";
   public static final String AUTOMATION_NAME_XCUITEST = "XCUITest";
+  public String automationName = AUTOMATION_NAME_APPIUM;
   
   public String scriptName;
   
@@ -59,7 +64,7 @@ public class Capabilities
   public String manifacturer;
   public String model;
   public String network;
-  public String openDeviceTimeout;
+  public Integer openDeviceTimeout;
   
   public String resolution;
   public static final String RESOLUTION_800x600 = "800x600";
@@ -76,6 +81,8 @@ public class Capabilities
   public Boolean baseAppiumBehavior;
   public Boolean enableAppiumBehavior;
   public Boolean useAppiumForWeb;
+  public Boolean useAppiumForHybrid;
+  public Boolean iOSResign;
   
   public String automationInfrastructure;
   public Boolean audioPlayback;
@@ -104,6 +111,8 @@ public class Capabilities
   public Boolean waitForPageLoad;
   public String language;
   public String locale;
+  public Boolean nativeWebTap;
+  public String tunnelId;
 
   public Integer newCommandTimeout;
   public Boolean enablePerformanceLogging;
@@ -121,6 +130,7 @@ public class Capabilities
   public Boolean autoWebview;
   public Integer autoWebviewTimeout;
   public Boolean ensureWebviewsHavePages;
+  public boolean fullContextList;
 
   public Boolean nativeWebScreenshot;
   public Boolean autoGrantPermissions;
@@ -143,7 +153,7 @@ public class Capabilities
   public String reportProjectName;
   public String reportProjectVersion;
   public String reportJobName;
-  public String reportJobNumber;
+  public Integer reportJobNumber;
   public String reportJobBrunch;
   public String reportTags;
   public String reportCustomFields;
@@ -153,38 +163,74 @@ public class Capabilities
   public static final String OUTPUT_VISIBILITY_PUBLIC = "public";
   public static final String OUTPUT_VISIBILITY_PRIVATE = "private";
   public static final String OUTPUT_VISIBILITY_GROUP = "group";
-
-  public DesiredCapabilities dc = new DesiredCapabilities();
+  
+  public Boolean perfectoFingerPrintSupport;
+  public Boolean perfectoSetLocationSupport;
+  public Boolean perfectoMotionInjectionSupport;
+  public Boolean perfectoFaceIDSupport;
+  public Boolean perfectoImageInjectionSupport;
+  public Boolean perfectoVoiceAssistantInjectionSupport;
+  public Boolean perfectoForceTouch;
+  public Boolean perfectoRebootSupport;
+  public String appiumVersion;
+  
+  private DesiredCapabilities dc = new DesiredCapabilities();
   
   private Log log = LogFactory.getLog(Capabilities.class);
+
+
   
   public Capabilities()
   {
   }
   
-  public DesiredCapabilities toSeleniumCapabilities() throws IllegalArgumentException, IllegalAccessException
+  public DesiredCapabilities toSeleniumCapabilities()
   {
-    Class cls = this.getClass();
+    Class<? extends Capabilities> cls = this.getClass();
     java.lang.reflect.Field[] fieldlist = cls.getDeclaredFields();
     
     log.debug("Converting Capabilities object to DesiredCapabilities");
 
     for (int i  = 0; i < fieldlist.length; i++) {
       String name = fieldlist[i].getName();
-      // If it's not a constant and not a DesiredCapbilities object
+      // If it's not const and not a DesiredCapbilities object
       if ((fieldlist[i].getModifiers() & Modifier.FINAL) != Modifier.FINAL 
           && !fieldlist[i].getType().equals(DesiredCapabilities.class) 
           && !fieldlist[i].getType().equals(Log.class))
       {
-        String value = String.valueOf(fieldlist[i].get(this)); 
-        if (value != "null")
-        {
-          log.debug(name + ": " + value);
-          dc.setCapability(name, value);
-        }        
+        try {
+          Object value = fieldlist[i].get(this);
+          if (value != null)
+          {
+            if (name.startsWith("perfecto"))
+              name = "perfecto:" + name.substring(8, 9).toLowerCase() + name.substring(9);
+            else if (name.startsWith("report"))
+              name = "report." + name.substring(6,7).toLowerCase() + name.substring(7);
+            
+            dc.setCapability(name, value);
+            log.debug(name + ": " + value);     
+          }
+        } catch (Exception e) {
+          e.printStackTrace();
+        }      
       }
     }
-
     return dc;
+  }
+  
+  public void setCapability(String capabilityName, Object capabilityValue)
+  {
+    dc.setCapability(capabilityName, capabilityValue);
+  }
+  
+  public void setCapability(String capabilityName, boolean capabilityValue)
+  {
+    dc.setCapability(capabilityName, capabilityValue);
+  }
+  
+  
+  public void setCapability(String capabilityName, int capabilityValue)
+  {
+    dc.setCapability(capabilityName, capabilityValue);
   }
 }
